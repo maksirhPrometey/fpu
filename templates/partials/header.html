@@ -2,8 +2,15 @@
 <header class="site-header" data-sticky-header>
   <div class="site-header__inner">
     <a class="brand" href="/" aria-label="{% trans 'Федерація Профспілок України — на головну' %}">
-      {% include 'partials/icons/logo_round.svg' %}
-      <span class="brand__text">{% trans "Федерація Профспілок України" %}</span>
+      <img
+        src="{% static 'img/logo.png' %}"
+        alt="{% trans 'ФПУ' %}"
+        class="brand__logo"
+        width="120"
+        height="40"
+        loading="eager"
+        decoding="async"
+      >
     </a>
 
     <nav class="primary-nav" aria-label="{% trans 'Основне меню' %}">
