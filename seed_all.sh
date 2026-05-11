@@ -117,6 +117,23 @@ if [[ -f "$FIXTURES_FILE" ]]; then
     log "Завантаження фікстур (loaddata) …"
     log "Файл: $FIXTURES_FILE ($(du -sh "$FIXTURES_FILE" | cut -f1))"
 
+    # PostgreSQL не приймає NUL-байти (\u0000) у рядках — очищаємо перед завантаженням
+    log "Очистка NUL-байтів …"
+    python3 -c "
+import gzip, sys
+path = sys.argv[1]
+with gzip.open(path, 'rb') as f:
+    raw = f.read()
+count = raw.count(b'\\\\u0000')
+if count:
+    raw = raw.replace(b'\\\\u0000', b'')
+    with gzip.open(path, 'wb') as f:
+        f.write(raw)
+    print(f'  Видалено \\\\u0000: {count}')
+else:
+    print('  NUL-байтів не знайдено')
+" "$FIXTURES_FILE"
+
     python manage.py loaddata "$FIXTURES_FILE"
     ok "loaddata завершено"
 
