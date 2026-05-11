@@ -1,9 +1,26 @@
 """
 Management command: load_fixtures
 
-Replaces Django's built-in `loaddata` for large gzipped JSON fixtures.
-Splits loading into batches so each transaction stays small → no SSL
-connection timeout on Render / Heroku / other hosted PostgreSQL.
+True streaming replacement for Django's `loaddata`.
+
+Why the naive approach OOM-crashes on Render Starter (512 MB):
+  json.loads(251 MB string) → ~500 MB in memory
+  + 30 K Django objects     → ~150 MB
+  Total ≈ 1 GB → OOM-kill
+
+This command uses ijson to parse the JSON array one element at a time.
+At any moment only `batch_size` raw dicts are in memory (~2–4 MB).
+
+Requirements:
+  pip install ijson  (already in requirements.txt)
+
+The fixture MUST be exported in FK-dependency order, e.g.:
+  python manage.py dumpdata \\
+      news.category news.article \\
+      pages.staticpage \\
+      gallery.galleryalbum gallery.galleryphoto \\
+      documents.documentcategory documents.document \\
+      --natural-foreign --output tools/data/fixtures.json.gz
 
 Usage:
     python manage.py load_fixtures tools/data/fixtures.json.gz
@@ -12,8 +29,11 @@ Usage:
 from __future__ import annotations
 
 import gzip
+import json
 import time
 from typing import Any
+
+import ijson
 
 from django.core import serializers
 from django.core.management.base import BaseCommand, CommandError
@@ -21,7 +41,7 @@ from django.db import transaction
 
 
 class Command(BaseCommand):
-    help = "Load gzipped JSON fixture in small batches (avoids PostgreSQL SSL timeout)"
+    help = "Stream-load a gzipped JSON fixture (low memory, batched transactions)"
 
     def add_arguments(self, parser: Any) -> None:
         parser.add_argument("fixture", help="Path to .json.gz fixture file")
@@ -36,52 +56,74 @@ class Command(BaseCommand):
         fixture_path: str = options["fixture"]
         batch_size: int = options["batch_size"]
 
-        # ── Read ──────────────────────────────────────────────────────────────
-        self.stdout.write(f"  Читання {fixture_path} …")
+        self.stdout.write(f"  Fixture: {fixture_path}")
+        self.stdout.write(f"  Batch size: {batch_size}")
+
+        t0 = time.monotonic()
+        loaded = 0
+        batch: list[dict] = []
+        current_model: str | None = None
+
+        def flush(model_label: str, items: list[dict]) -> int:
+            """Deserialize and save one batch. Returns number of saved objects."""
+            if not items:
+                return 0
+            batch_json = json.dumps(items)
+            with transaction.atomic():
+                for obj in serializers.deserialize("json", batch_json):
+                    obj.save()
+            return len(items)
+
         try:
             with gzip.open(fixture_path, "rb") as fh:
-                raw = fh.read()
+                for item in ijson.items(fh, "item"):
+                    model_label: str = item["model"]
+
+                    # When model changes → flush accumulated batch first
+                    if model_label != current_model:
+                        if batch and current_model:
+                            n = flush(current_model, batch)
+                            loaded += n
+                            elapsed = time.monotonic() - t0
+                            self.stdout.write(
+                                self.style.SUCCESS(
+                                    f"  ✓ {current_model}: {n}  (total {loaded}, {elapsed:.0f}s)"
+                                )
+                            )
+                        batch = []
+                        current_model = model_label
+                        self.stdout.write(f"  → {model_label} …")
+
+                    batch.append(item)
+
+                    if len(batch) >= batch_size:
+                        n = flush(current_model, batch)  # type: ignore[arg-type]
+                        loaded += n
+                        batch = []
+                        elapsed = time.monotonic() - t0
+                        self.stdout.write(
+                            f"    {loaded} об'єктів ({elapsed:.0f}s)", ending="\r"
+                        )
+                        self.stdout.flush()
+
         except (OSError, EOFError) as exc:
-            raise CommandError(f"Не вдалося відкрити {fixture_path}: {exc}") from exc
+            raise CommandError(f"Помилка читання {fixture_path}: {exc}") from exc
 
-        file_mb = len(raw) / 1_048_576
-        self.stdout.write(f"  Розмір: {file_mb:.1f} MB")
-
-        # ── Deserialize ───────────────────────────────────────────────────────
-        self.stdout.write("  Десеріалізація …")
-        t0 = time.monotonic()
-        try:
-            objects = list(serializers.deserialize("json", raw))
-        except Exception as exc:
-            raise CommandError(f"Помилка десеріалізації: {exc}") from exc
-
-        total = len(objects)
-        self.stdout.write(f"  Об'єктів: {total}  ({time.monotonic() - t0:.1f}s)")
-
-        # ── Batch load ────────────────────────────────────────────────────────
-        self.stdout.write(f"  Завантаження батчами по {batch_size} …")
-        t1 = time.monotonic()
-        loaded = 0
-
-        for start in range(0, total, batch_size):
-            batch = objects[start : start + batch_size]
-            with transaction.atomic():
-                for obj in batch:
-                    obj.save()
-                loaded += len(batch)
-
-            pct = loaded * 100 // total
-            elapsed = time.monotonic() - t1
+        # Flush last model's remaining items
+        if batch and current_model:
+            n = flush(current_model, batch)
+            loaded += n
+            elapsed = time.monotonic() - t0
             self.stdout.write(
-                f"  {loaded}/{total}  {pct}%  ({elapsed:.0f}s)",
-                ending="\r",
+                self.style.SUCCESS(
+                    f"  ✓ {current_model}: {n}  (total {loaded}, {elapsed:.0f}s)"
+                )
             )
-            self.stdout.flush()
 
-        self.stdout.write("")
         elapsed_total = time.monotonic() - t0
+        self.stdout.write("")
         self.stdout.write(
             self.style.SUCCESS(
-                f"  ✓ load_fixtures: {loaded} об'єктів за {elapsed_total:.1f}s"
+                f"  ✓ load_fixtures завершено: {loaded} об'єктів за {elapsed_total:.1f}s"
             )
         )
