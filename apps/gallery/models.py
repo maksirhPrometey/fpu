@@ -61,7 +61,11 @@ class GalleryAlbum(models.Model):
             except Exception:
                 pass
         if self.cover_local:
-            return f"/media/joomla_images/{self.cover_local}"
+            from pathlib import Path
+            from django.conf import settings
+            local_path = Path(settings.MEDIA_ROOT) / "joomla_images" / self.cover_local
+            if local_path.exists():
+                return f"/media/joomla_images/{self.cover_local}"
         return ""
 
     @property
@@ -109,5 +113,9 @@ class GalleryPhoto(models.Model):
             except Exception:
                 pass
         if self.image_local:
-            return f"/media/joomla_images/{self.image_local}"
+            from pathlib import Path
+            from django.conf import settings
+            local_path = Path(settings.MEDIA_ROOT) / "joomla_images" / self.image_local
+            if local_path.exists():
+                return f"/media/joomla_images/{self.image_local}"
         return ""
