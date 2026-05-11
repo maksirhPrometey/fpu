@@ -13,10 +13,11 @@ staticfiles/
 logo.png
 
 # SQL dumps and large data files — never commit
-# All raw import data lives in tools/data/ (git-ignored except .gitkeep and README.md)
+# All raw import data lives in tools/data/ (git-ignored except .gitkeep, README.md, fixtures)
 tools/data/*
 !tools/data/.gitkeep
 !tools/data/README.md
+!tools/data/fixtures.json.gz
 
 # Data archive for deployment (generated locally, uploaded to GitHub Releases)
 fpu_data.tar.gz
