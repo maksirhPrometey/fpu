@@ -100,9 +100,20 @@
 
   {# ── Bottom bar ─────────────────────────────────────────────────────────── #}
   <div class="site-footer__bottom">
-    <p class="site-footer__copy">
-      &copy; {{ site_year }} {% trans "Федерація профспілок України" %}
-    </p>
+    <div class="footer-brand">
+      <img
+        src="{% static 'img/logo.png' %}"
+        alt="{% trans 'ФПУ' %}"
+        class="footer-brand__logo"
+        width="40"
+        height="40"
+        loading="lazy"
+        decoding="async"
+      >
+      <p class="site-footer__copy">
+        &copy; {{ site_year }} {% trans "Федерація профспілок України" %}
+      </p>
+    </div>
     <nav aria-label="{% trans 'Посилання footer' %}">
       <a class="footer-bottom__link" href="{% url 'core:contact' %}">{% trans "Написати нам" %}</a>
       <a class="footer-bottom__link" href="{% url 'django.contrib.sitemaps.views.sitemap' %}">{% trans "Карта сайту" %}</a>

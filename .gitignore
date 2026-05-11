@@ -17,3 +17,6 @@ logo.png
 tools/data/*
 !tools/data/.gitkeep
 !tools/data/README.md
+
+# Data archive for deployment (generated locally, uploaded to GitHub Releases)
+fpu_data.tar.gz
