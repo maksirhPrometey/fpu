@@ -11,6 +11,12 @@ staticfiles/
 .DS_Store
 *.log
 
-# SQL dumps contain sensitive data — never commit
+# SQL dumps and large data files — never commit
 tools/*.sql
 tools/*.sql.gz
+tools/content_bodies.json
+tools/seo_inventory.json
+tools/articles.tsv
+tools/cats.tsv
+tools/menu.tsv
+tools/image_paths.txt
