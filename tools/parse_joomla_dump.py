@@ -20,10 +20,10 @@ import sys
 from pathlib import Path
 
 BASE = Path(__file__).parent
-CATS_TSV = BASE / "cats.tsv"
-ARTICLES_TSV = BASE / "articles.tsv"
-MENU_TSV = BASE / "menu.tsv"
-OUT = BASE / "seo_inventory.json"
+CATS_TSV = BASE / "data" / "cats.tsv"
+ARTICLES_TSV = BASE / "data" / "articles.tsv"
+MENU_TSV = BASE / "data" / "menu.tsv"
+OUT = BASE / "data" / "seo_inventory.json"
 
 _IMG_FIELDS = ("image_intro", "image_fulltext")
 

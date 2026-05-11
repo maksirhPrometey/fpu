@@ -27,8 +27,8 @@ from apps.news.models import Article, Category
 
 
 BASE = Path(__file__).resolve().parents[4]  # apps/news/management/commands → project root
-DEFAULT_CATS = BASE / "tools" / "cats.tsv"
-DEFAULT_ARTS = BASE / "tools" / "articles.tsv"
+DEFAULT_CATS = BASE / "tools" / "data" / "cats.tsv"
+DEFAULT_ARTS = BASE / "tools" / "data" / "articles.tsv"
 
 _IMG_FIELDS = ("image_intro", "image_fulltext")
 

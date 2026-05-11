@@ -22,7 +22,7 @@ from django.db import transaction
 from apps.news.models import Article
 
 BASE = Path(__file__).resolve().parents[4]
-DEFAULT_ARTS = BASE / "tools" / "articles.tsv"
+DEFAULT_ARTS = BASE / "tools" / "data" / "articles.tsv"
 MEDIA_DIR = BASE / "media" / "joomla_images"
 IMG_EXTS = {".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".tif"}
 

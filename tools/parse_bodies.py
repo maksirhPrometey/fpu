@@ -24,8 +24,8 @@ import sys
 from pathlib import Path
 
 BASE = Path(__file__).parent
-DEFAULT_SQL = BASE / "fpsu_seo_dump.sql"
-DEFAULT_OUT = BASE / "content_bodies.json"
+DEFAULT_SQL = BASE / "data" / "fpsu_seo_dump.sql"
+DEFAULT_OUT = BASE / "data" / "content_bodies.json"
 
 TABLE = "zeki2_content"
 # 0-based column indices we need; stop parsing after MAX_NEEDED_COL

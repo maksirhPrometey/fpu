@@ -37,8 +37,8 @@ from apps.news.models import Article
 from apps.pages.models import StaticPage
 
 BASE = Path(__file__).resolve().parents[4]
-DEFAULT_BODIES = BASE / "tools" / "content_bodies.json"
-DEFAULT_MENU = BASE / "tools" / "menu.tsv"
+DEFAULT_BODIES = BASE / "tools" / "data" / "content_bodies.json"
+DEFAULT_MENU = BASE / "tools" / "data" / "menu.tsv"
 
 _IMAGE_SRC_RE = re.compile(r'(src|href)="(/?images/)', re.IGNORECASE)
 _ARTICLE_ID_RE = re.compile(r"view=article&(?:amp;)?id=(\d+)", re.IGNORECASE)

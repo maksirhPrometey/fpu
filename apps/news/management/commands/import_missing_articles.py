@@ -36,7 +36,7 @@ from django.utils.text import slugify
 from apps.news.models import Article, Category
 
 BASE = Path(__file__).resolve().parents[4]
-DEFAULT_BODIES = BASE / "tools" / "content_bodies.json"
+DEFAULT_BODIES = BASE / "tools" / "data" / "content_bodies.json"
 
 _IMAGE_SRC_RE = re.compile(r'(src|href)="(/?images/)', re.IGNORECASE)
 _FPSU_BASE = "https://www.fpsu.org.ua"

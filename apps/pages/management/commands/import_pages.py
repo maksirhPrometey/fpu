@@ -24,7 +24,7 @@ from django.db import transaction
 from apps.pages.models import StaticPage
 
 BASE = Path(__file__).resolve().parents[4]
-DEFAULT_MENU = BASE / "tools" / "menu.tsv"
+DEFAULT_MENU = BASE / "tools" / "data" / "menu.tsv"
 
 
 def _read_tsv(path: Path, num_cols: int) -> list[list[str]]:

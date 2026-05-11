@@ -10,13 +10,10 @@ media/
 staticfiles/
 .DS_Store
 *.log
+logo.png
 
 # SQL dumps and large data files — never commit
-tools/*.sql
-tools/*.sql.gz
-tools/content_bodies.json
-tools/seo_inventory.json
-tools/articles.tsv
-tools/cats.tsv
-tools/menu.tsv
-tools/image_paths.txt
+# All raw import data lives in tools/data/ (git-ignored except .gitkeep and README.md)
+tools/data/*
+!tools/data/.gitkeep
+!tools/data/README.md

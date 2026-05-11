@@ -33,7 +33,7 @@ from apps.news.models import Article
 
 BASE = Path(__file__).resolve().parents[4]
 DEFAULT_KEY = BASE / "key_dig_priv.pem"
-DEFAULT_ARTS_TSV = BASE / "tools" / "articles.tsv"
+DEFAULT_ARTS_TSV = BASE / "tools" / "data" / "articles.tsv"
 REMOTE_BASE = "/sites/www.fpsu.org.ua"
 SSH_HOST = "78.27.236.224"
 SSH_PORT = "9092"
