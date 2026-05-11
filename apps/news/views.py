@@ -47,6 +47,15 @@ def article_in_cat(
 @require_GET
 def category_list(request: HttpRequest, cat_path: str) -> HttpResponse:
     """Category listing page: /<cat_path>/"""
+    # #region agent log
+    import json, time
+    _log_path = "/Users/olegbonislavskyi/Sites/Профспілки/.cursor/debug-6e45e3.log"
+    try:
+        with open(_log_path, "a") as _f:
+            _f.write(json.dumps({"sessionId": "6e45e3", "hypothesisId": "A", "location": "news/views.py:50", "message": "news.category_list called", "data": {"cat_path": cat_path}, "timestamp": int(time.time() * 1000)}) + "\n")
+    except Exception:
+        pass
+    # #endregion
     category = get_object_or_404(Category, path=cat_path.strip("/"), is_active=True)
     articles = (
         Article.objects.filter(category=category, is_published=True)
