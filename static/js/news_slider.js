@@ -91,7 +91,6 @@
 
     /* ── Autoplay ────────────────────────────────────────────────────── */
     function startAuto() {
-      if (reduced) return;
       stopAuto();
       startProgress();
       autoTimer = setTimeout(() => {
