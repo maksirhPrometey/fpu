@@ -10,6 +10,7 @@ Cross-process safety:
   - Exclusive flock on tools/.upload_images_cloudinary.lock so two terminals
     cannot overwrite each other's image_map.json.
   - Atomic save (temp file + os.replace) to avoid corrupt JSON on crash.
+  - public_id longer than ~220 chars → fpsu/joomla/x/<sha256> (Cloudinary limit).
 
 Usage:
     python tools/build_image_paths.py               # build the list first
@@ -20,6 +21,7 @@ Usage:
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import sys
@@ -108,9 +110,17 @@ def _atomic_write_json(path: Path, data: dict[str, str]) -> None:
         raise
 
 
+# Cloudinary: public_id max ~255 chars; дуже довгі локальні шляхи → SHA-256
+_MAX_PUBLIC_ID_LEN = 220
+
+
 def _public_id(rel_path: str) -> str:
     stem = Path(rel_path).with_suffix("").as_posix()
-    return f"{CLOUDINARY_FOLDER}/{stem}"
+    base = f"{CLOUDINARY_FOLDER}/{stem}"
+    if len(base) <= _MAX_PUBLIC_ID_LEN:
+        return base
+    digest = hashlib.sha256(rel_path.encode("utf-8")).hexdigest()
+    return f"{CLOUDINARY_FOLDER}/x/{digest}"
 
 
 def _upload_one(rel_path: str, media_dir: Path) -> tuple[str, str | None]:
