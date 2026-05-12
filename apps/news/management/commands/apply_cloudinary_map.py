@@ -123,7 +123,7 @@ class Command(BaseCommand):
 
         # Covers — ДО body rewrite, бо після rewrite body вже не містить fpsu.org.ua
         if not skip_covers:
-            self._update_covers(_lookup, batch, dry_run)
+            self._update_covers(_lookup, image_map, batch, dry_run)
 
         if not skip_body:
             self._rewrite_bodies(_lookup, batch, dry_run)
@@ -199,8 +199,23 @@ class Command(BaseCommand):
 
         return _FPSU_RE.sub(_sub, html)
 
-    def _update_covers(self, _lookup, batch: int, dry_run: bool) -> None:
+    def _update_covers(self, _lookup, image_map: dict, batch: int, dry_run: bool) -> None:
         _write_out(self, "Updating Article.image (cover) …")
+
+        # #region agent log — H-C: check how many have non-empty image already
+        import json as _json, time as _time
+        _log = "/Users/olegbonislavskyi/Sites/Профспілки/.cursor/debug-6e45e3.log"
+        def _dbg(hyp, msg, data):
+            try:
+                with open(_log, "a") as _f:
+                    _f.write(_json.dumps({"sessionId":"6e45e3","hypothesisId":hyp,"location":"apply_cloudinary_map.py","message":msg,"data":data,"timestamp":int(_time.time()*1000)})+"\n")
+            except Exception: pass
+        _dbg("H-C","image field stats",{
+            "total_null_or_empty": Article.objects.filter(Q(image__isnull=True)|Q(image="")).count(),
+            "with_fpsu_in_body": Article.objects.filter(Q(image__isnull=True)|Q(image=""), body__icontains="fpsu.org.ua/images/").count(),
+            "already_has_image": Article.objects.exclude(image="").exclude(image__isnull=True).count(),
+        })
+        # #endregion
 
         base_qs = (
             Article.objects.filter(
@@ -210,6 +225,37 @@ class Command(BaseCommand):
             .order_by("pk")
             .only("id", "body", "image")
         )
+
+        # #region agent log — H-A/H-B: sample first article body + regex match
+        first_art = base_qs.first()
+        if first_art:
+            m_sample = _FPSU_RE.search(first_art.body)
+            _dbg("H-A","first article sample",{
+                "pk": first_art.pk,
+                "body_snippet": first_art.body[:300],
+                "regex_matched": bool(m_sample),
+                "match_group0": m_sample.group(0) if m_sample else None,
+                "match_group2": m_sample.group(2) if m_sample else None,
+                "match_group3": m_sample.group(3) if m_sample else None,
+                "match_group4": m_sample.group(4) if m_sample else None,
+            })
+            if m_sample:
+                path = _path_from_match(m_sample)
+                lookup_res = _lookup(path)
+                webp_path = path if path.endswith(".webp") else str(__import__("pathlib").Path(path).with_suffix(".webp"))
+                img_path = "images/" + path
+                img_webp = "images/" + webp_path
+                _dbg("H-B","lookup result for first article",{
+                    "extracted_path": path,
+                    "lookup_result": lookup_res,
+                    "map_len": len(image_map),
+                    "map_sample_keys": list(image_map.keys())[:5],
+                    "tried_direct": path in image_map,
+                    "tried_webp": webp_path in image_map,
+                    "tried_images_prefix": img_path in image_map,
+                    "tried_images_webp": img_webp in image_map,
+                })
+        # #endregion
 
         _write_out(self, "  Covers: сканування батчами по pk (без COUNT) …")
 
