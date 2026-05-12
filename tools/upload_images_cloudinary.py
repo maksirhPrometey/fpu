@@ -6,10 +6,15 @@ Saves original_rel_path → cloudinary_secure_url mapping to tools/image_map.jso
 Supports resume: skips already-uploaded paths.
 Supports parallel uploads via --workers.
 
+Cross-process safety:
+  - Exclusive flock on tools/.upload_images_cloudinary.lock so two terminals
+    cannot overwrite each other's image_map.json.
+  - Atomic save (temp file + os.replace) to avoid corrupt JSON on crash.
+
 Usage:
     python tools/build_image_paths.py               # build the list first
-    python tools/upload_images_cloudinary.py        # upload all (8 workers)
-    python tools/upload_images_cloudinary.py --workers 16
+    python tools/upload_images_cloudinary.py        # default 12 workers
+    python tools/upload_images_cloudinary.py --workers 20
     python tools/upload_images_cloudinary.py --limit 200 --dry-run
 """
 from __future__ import annotations
@@ -17,16 +22,28 @@ from __future__ import annotations
 import json
 import os
 import sys
+import tempfile
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
+from typing import IO
 
 import cloudinary
 import cloudinary.uploader
 
+try:
+    import fcntl
+
+    _HAS_FCNTL = True
+except ImportError:
+    fcntl = None  # type: ignore[assignment]
+    _HAS_FCNTL = False
+
 BASE = Path(__file__).parent.parent
 CLOUDINARY_FOLDER = "fpsu/joomla"
 _map_lock = threading.Lock()
+_LOCK_PATH = BASE / "tools" / ".upload_images_cloudinary.lock"
+_SAVE_EVERY = 100
 
 
 def load_env() -> None:
@@ -35,20 +52,67 @@ def load_env() -> None:
         for line in env_file.read_text().splitlines():
             if "=" in line and not line.startswith("#"):
                 key, _, val = line.partition("=")
-                os.environ[key.strip()] = val.strip()
+                os.environ.setdefault(key.strip(), val.strip())
+
+
+def _acquire_run_lock() -> IO[str] | None:
+    """
+    Block until exclusive lock (only one upload process).
+    Returns open file handle — keep open until upload finishes.
+    """
+    if not _HAS_FCNTL:
+        return None
+    _LOCK_PATH.parent.mkdir(parents=True, exist_ok=True)
+    fp = open(_LOCK_PATH, "w", encoding="utf-8")
+    fcntl.flock(fp.fileno(), fcntl.LOCK_EX)
+    fp.write(f"pid={os.getpid()}\n")
+    fp.flush()
+    return fp
+
+
+def _release_run_lock(fp: IO[str] | None) -> None:
+    if fp is None or not _HAS_FCNTL:
+        return
+    try:
+        fcntl.flock(fp.fileno(), fcntl.LOCK_UN)
+    except OSError:
+        pass
+    fp.close()
+
+
+def _load_map(path: Path) -> dict[str, str]:
+    if not path.exists():
+        return {}
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+        return data if isinstance(data, dict) else {}
+    except Exception:
+        return {}
+
+
+def _atomic_write_json(path: Path, data: dict[str, str]) -> None:
+    text = json.dumps(data, ensure_ascii=False, separators=(",", ":"))
+    fd, tmp = tempfile.mkstemp(
+        dir=path.parent, prefix=".image_map_", suffix=".tmp"
+    )
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            f.write(text)
+        os.replace(tmp, path)
+    except Exception:
+        try:
+            os.unlink(tmp)
+        except OSError:
+            pass
+        raise
 
 
 def _public_id(rel_path: str) -> str:
-    """Derive stable Cloudinary public_id: folder/path/stem (no extension)."""
     stem = Path(rel_path).with_suffix("").as_posix()
     return f"{CLOUDINARY_FOLDER}/{stem}"
 
 
-def _upload_one(
-    rel_path: str,
-    media_dir: Path,
-) -> tuple[str, str | None]:
-    """Upload a single file. Returns (rel_path, secure_url_or_None)."""
+def _upload_one(rel_path: str, media_dir: Path) -> tuple[str, str | None]:
     local_file = media_dir / rel_path
     if not local_file.exists():
         return rel_path, None
@@ -71,7 +135,12 @@ def main() -> None:
     parser.add_argument("--paths-file", default=str(BASE / "tools" / "image_paths.txt"))
     parser.add_argument("--media-dir", default=str(BASE / "media" / "joomla_images"))
     parser.add_argument("--output", default=str(BASE / "tools" / "image_map.json"))
-    parser.add_argument("--workers", type=int, default=8, help="Parallel upload threads (default 8)")
+    parser.add_argument(
+        "--workers",
+        type=int,
+        default=12,
+        help="Parallel upload threads (default 12)",
+    )
     parser.add_argument("--limit", type=int, default=0, help="Max images (0=all)")
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
@@ -91,74 +160,84 @@ def main() -> None:
         print(f"ERROR: {paths_file} not found. Run build_image_paths.py first.", file=sys.stderr)
         sys.exit(1)
 
-    # Resume: load existing map
-    image_map: dict[str, str] = {}
-    if output_path.exists():
-        try:
-            image_map = json.loads(output_path.read_text(encoding="utf-8"))
-        except Exception:
-            pass
-        print(f"Resuming: {len(image_map)} already uploaded.")
+    lock_fp: IO[str] | None = None
+    if not args.dry_run:
+        if _HAS_FCNTL:
+            print("Очікування блокування (інший upload не може перезаписати map) …", flush=True)
+            lock_fp = _acquire_run_lock()
+        else:
+            print("WARNING: fcntl недоступний — не запускай два upload одночасно.", flush=True)
 
-    all_paths = [p.strip() for p in paths_file.read_text(encoding="utf-8").splitlines() if p.strip()]
-    # Skip already done
-    pending = [p for p in all_paths if p not in image_map]
+    try:
+        # Після lock — свіжа карта з диску (один письменник)
+        image_map = _load_map(output_path)
+        print(f"Resuming: {len(image_map)} already in map.", flush=True)
 
-    if args.limit:
-        pending = pending[: args.limit]
+        all_paths = [
+            p.strip()
+            for p in paths_file.read_text(encoding="utf-8").splitlines()
+            if p.strip()
+        ]
+        pending = [p for p in all_paths if p not in image_map]
 
-    total_all = len(all_paths)
-    total_pending = len(pending)
-    print(f"Total: {total_all}, already uploaded: {len(image_map)}, to upload: {total_pending}")
+        if args.limit:
+            pending = pending[: args.limit]
 
-    if not pending:
-        print("Nothing to do.")
-        return
-
-    if args.dry_run:
-        print(f"DRY RUN ({args.workers} workers) — first 10:")
-        for p in pending[:10]:
-            print(f"  {p} → {_public_id(p)}")
-        return
-
-    print(f"Starting upload with {args.workers} workers …")
-
-    uploaded = failed = 0
-
-    def _save() -> None:
-        output_path.write_text(
-            json.dumps(image_map, ensure_ascii=False, separators=(",", ":")),
-            encoding="utf-8",
+        total_all = len(all_paths)
+        total_pending = len(pending)
+        print(
+            f"Total: {total_all}, in map: {len(image_map)}, to upload: {total_pending}",
+            flush=True,
         )
 
-    with ThreadPoolExecutor(max_workers=args.workers) as pool:
-        futures = {pool.submit(_upload_one, p, media_dir): p for p in pending}
-        for future in as_completed(futures):
-            rel_path, result = future.result()
+        if not pending:
+            print("Nothing to do.", flush=True)
+            return
 
-            with _map_lock:
-                if result and not result.startswith("__error__:"):
-                    image_map[rel_path] = result
-                    uploaded += 1
-                else:
-                    failed += 1
-                    if result:
-                        err = result.replace("__error__:", "")
-                        print(f"  FAIL {rel_path}: {err}")
+        if args.dry_run:
+            print(f"DRY RUN ({args.workers} workers) — first 10:", flush=True)
+            for p in pending[:10]:
+                print(f"  {p} → {_public_id(p)}", flush=True)
+            return
 
-                done = uploaded + failed
-                if done % 50 == 0:
-                    _save()
-                    pct = 100 * (len(image_map)) // total_all
-                    print(
-                        f"  [{pct}%] {len(image_map)}/{total_all} total | "
-                        f"+{uploaded} uploaded, {failed} failed this run"
-                    )
+        print(f"Starting upload with {args.workers} workers …", flush=True)
 
-    _save()
-    print(f"\nDone. Uploaded: {uploaded}, Failed: {failed}")
-    print(f"Total in map: {len(image_map)} / {total_all}")
-    print(f"Map saved → {output_path}")
+        uploaded = failed = 0
+
+        def _save() -> None:
+            _atomic_write_json(output_path, image_map)
+
+        with ThreadPoolExecutor(max_workers=args.workers) as pool:
+            futures = {pool.submit(_upload_one, p, media_dir): p for p in pending}
+            for future in as_completed(futures):
+                rel_path, result = future.result()
+
+                with _map_lock:
+                    if result and not result.startswith("__error__:"):
+                        image_map[rel_path] = result
+                        uploaded += 1
+                    else:
+                        failed += 1
+                        if result:
+                            err = result.replace("__error__:", "")
+                            print(f"  FAIL {rel_path}: {err}", flush=True)
+
+                    done = uploaded + failed
+                    if done % _SAVE_EVERY == 0:
+                        _save()
+                        pct = 100 * len(image_map) // total_all if total_all else 0
+                        print(
+                            f"  [{pct}%] {len(image_map)}/{total_all} in map | "
+                            f"+{uploaded} ok, {failed} fail this run",
+                            flush=True,
+                        )
+
+        _save()
+        print(f"\nDone. Uploaded: {uploaded}, Failed: {failed}", flush=True)
+        print(f"Total in map: {len(image_map)} / {total_all}", flush=True)
+        print(f"Map saved → {output_path}", flush=True)
+    finally:
+        _release_run_lock(lock_fp)
 
 
 if __name__ == "__main__":

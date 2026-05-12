@@ -24,3 +24,4 @@ fpu_data.tar.gz
 
 # Generated tool artifacts — regeneratable, not needed in git
 tools/image_paths.txt
+tools/.upload_images_cloudinary.lock
