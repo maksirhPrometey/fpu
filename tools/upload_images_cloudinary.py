@@ -56,7 +56,8 @@ def main() -> None:
 
     cloudinary_url = os.environ.get("CLOUDINARY_URL", "")
     if cloudinary_url:
-        cloudinary.config(from_url=cloudinary_url)
+        # reset_config() re-reads CLOUDINARY_URL from env after load_env() sets it
+        cloudinary.reset_config()
     elif not args.dry_run:
         print("ERROR: CLOUDINARY_URL not set.", file=sys.stderr)
         sys.exit(1)
