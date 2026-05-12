@@ -20,7 +20,7 @@ def home(request: HttpRequest) -> HttpResponse:
     articles_qs = (
         Article.objects.filter(is_published=True)
         .select_related("category")
-        .order_by("-published_at")[:10]
+        .order_by("-published_at")[:13]
     )
     articles = list(articles_qs)
     if not articles:

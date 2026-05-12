@@ -37,8 +37,9 @@ SITEMAPS = {
 }
 
 urlpatterns = [
-    # Redirect /admin (no slash) → /admin/ before pages catch-all intercepts it
+    # Redirect bare slugs (no trailing slash) → with slash, before pages catch-all intercepts
     path("admin", RedirectView.as_view(url="/admin/", permanent=True)),
+    path("contacts", RedirectView.as_view(url="/contacts/", permanent=True)),
     path("healthz/", healthz, name="healthz"),
     path("robots.txt", robots_txt, name="robots_txt"),
     path(

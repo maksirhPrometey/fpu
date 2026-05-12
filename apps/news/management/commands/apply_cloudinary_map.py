@@ -33,6 +33,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 from django.db.models import Q
 
+from apps.gallery.models import GalleryAlbum, GalleryPhoto
 from apps.news.models import Article
 from apps.pages.models import StaticPage
 
@@ -86,6 +87,11 @@ class Command(BaseCommand):
             help="Skip Article.image update (body rewrite only)",
         )
         parser.add_argument("--dry-run", action="store_true")
+        parser.add_argument(
+            "--gallery",
+            action="store_true",
+            help="Also update GalleryAlbum.cover_image and GalleryPhoto.image from map",
+        )
 
     def handle(self, *args: Any, **options: Any) -> None:
         map_path = Path(options["image_map"])
@@ -93,6 +99,7 @@ class Command(BaseCommand):
         skip_body: bool = options["skip_body"]
         skip_covers: bool = options["skip_covers"]
         dry_run: bool = options["dry_run"]
+        gallery: bool = options["gallery"]
 
         if not map_path.exists():
             raise CommandError(
@@ -138,10 +145,13 @@ class Command(BaseCommand):
 
         # Covers — ДО body rewrite, бо після rewrite body вже не містить fpsu.org.ua
         if not skip_covers:
-            self._update_covers(_lookup, image_map, batch, dry_run)
+            self._update_covers(_lookup, batch, dry_run)
 
         if not skip_body:
             self._rewrite_bodies(_lookup, batch, dry_run)
+
+        if gallery:
+            self._update_gallery(_lookup, batch, dry_run)
 
         self.stdout.write(self.style.SUCCESS("Done."))
         self.stdout.flush()
@@ -214,24 +224,8 @@ class Command(BaseCommand):
 
         return _FPSU_RE.sub(_sub, html)
 
-    def _update_covers(self, _lookup, image_map: dict, batch: int, dry_run: bool) -> None:
+    def _update_covers(self, _lookup, batch: int, dry_run: bool) -> None:
         _write_out(self, "Updating Article.image (cover) …")
-
-        # #region agent log — H-C: check how many have non-empty image already
-        import json as _json, time as _time
-        def _dbg(hyp, msg, data):
-            print(f"[DBG:{hyp}] {msg}: {_json.dumps(data, ensure_ascii=False)}", flush=True)
-            try:
-                _log = "/Users/olegbonislavskyi/Sites/Профспілки/.cursor/debug-6e45e3.log"
-                with open(_log, "a") as _f:
-                    _f.write(_json.dumps({"sessionId":"6e45e3","hypothesisId":hyp,"location":"apply_cloudinary_map.py","message":msg,"data":data,"timestamp":int(_time.time()*1000)})+"\n")
-            except Exception: pass
-        _dbg("H-C","image field stats",{
-            "total_null_or_empty": Article.objects.filter(Q(image__isnull=True)|Q(image="")).count(),
-            "with_fpsu_in_body": Article.objects.filter(Q(image__isnull=True)|Q(image=""), body__icontains="fpsu.org.ua/images/").count(),
-            "already_has_image": Article.objects.exclude(image="").exclude(image__isnull=True).count(),
-        })
-        # #endregion
 
         base_qs = (
             Article.objects.filter(
@@ -241,37 +235,6 @@ class Command(BaseCommand):
             .order_by("pk")
             .only("id", "body", "image")
         )
-
-        # #region agent log — H-A/H-B: sample first article body + regex match
-        first_art = base_qs.first()
-        if first_art:
-            m_sample = _FPSU_RE.search(first_art.body)
-            _dbg("H-A","first article sample",{
-                "pk": first_art.pk,
-                "body_snippet": first_art.body[:300],
-                "regex_matched": bool(m_sample),
-                "match_group0": m_sample.group(0) if m_sample else None,
-                "match_group2": m_sample.group(2) if m_sample else None,
-                "match_group3": m_sample.group(3) if m_sample else None,
-                "match_group4": m_sample.group(4) if m_sample else None,
-            })
-            if m_sample:
-                path = _path_from_match(m_sample)
-                lookup_res = _lookup(path)
-                webp_path = path if path.endswith(".webp") else str(__import__("pathlib").Path(path).with_suffix(".webp"))
-                img_path = "images/" + path
-                img_webp = "images/" + webp_path
-                _dbg("H-B","lookup result for first article (post-fix)",{
-                    "extracted_path": path,
-                    "lookup_result": lookup_res[:60] if lookup_res else None,
-                    "lookup_fixed": lookup_res is not None,
-                    "map_len": len(image_map),
-                    "tried_direct": path in image_map,
-                    "tried_webp": webp_path in image_map,
-                    "tried_images_prefix": img_path in image_map,
-                    "tried_images_webp": img_webp in image_map,
-                })
-        # #endregion
 
         _write_out(self, "  Covers: сканування батчами по pk (без COUNT) …")
 
@@ -311,3 +274,43 @@ class Command(BaseCommand):
             return None
         orig_path = _path_from_match(m)
         return _lookup(orig_path)
+
+    def _update_gallery(self, _lookup, batch: int, dry_run: bool) -> None:
+        """Set GalleryAlbum.cover_image and GalleryPhoto.image from image_map."""
+        _write_out(self, "Updating Gallery covers …")
+        albums_updated = 0
+        for album in GalleryAlbum.objects.filter(cover_image="").only("id", "cover_local"):
+            if not album.cover_local:
+                continue
+            cdn = _lookup(album.cover_local)
+            if cdn:
+                if not dry_run:
+                    GalleryAlbum.objects.filter(pk=album.pk).update(cover_image=cdn)
+                albums_updated += 1
+        _write_out(self, f"  → {albums_updated} album covers set")
+
+        _write_out(self, "Updating Gallery photo images …")
+        photos_updated = 0
+        last_pk = 0
+        while True:
+            chunk = list(
+                GalleryPhoto.objects.filter(image="", pk__gt=last_pk)
+                .order_by("pk")
+                .only("id", "image_local")[:batch]
+            )
+            if not chunk:
+                break
+            last_pk = chunk[-1].pk
+            to_save = []
+            for photo in chunk:
+                if not photo.image_local:
+                    continue
+                cdn = _lookup(photo.image_local)
+                if cdn:
+                    photo.image = cdn
+                    to_save.append(photo)
+            if to_save and not dry_run:
+                with transaction.atomic():
+                    GalleryPhoto.objects.bulk_update(to_save, ["image"], batch_size=batch)
+            photos_updated += len(to_save)
+        _write_out(self, f"  → {photos_updated} photo images set")

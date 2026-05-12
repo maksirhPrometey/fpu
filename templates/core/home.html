@@ -190,6 +190,50 @@
   </section>
   {% endif %}
 
+  {% if articles|length > 6 %}
+  <section class="home-news-grid" aria-labelledby="home-news-title">
+    <header class="home-news-grid__head">
+      <h2 id="home-news-title" class="news-feed__title">{% trans "Популярні новини" %}</h2>
+    </header>
+    <ul class="home-news-grid__list">
+      {% for article in articles|slice:"6:13" %}
+      <li class="home-news-grid__item">
+        <article class="news-card--compact">
+          <a class="news-card--compact__media" href="{{ article.get_absolute_url }}" tabindex="-1" aria-hidden="true">
+            {% if article.image_url %}
+            <img src="{{ article.image_url }}" alt="" loading="lazy" decoding="async">
+            {% else %}
+            <span class="news-card--compact__placeholder">
+              <span class="news-card__placeholder-label">{{ article.display_date }}</span>
+              <span class="news-card__placeholder-heading">{{ article.title }}</span>
+            </span>
+            {% endif %}
+          </a>
+          <div class="news-card--compact__body">
+            {% if article.category %}
+            <span class="news-card--compact__cat">{{ article.category.title }}</span>
+            {% endif %}
+            <p class="news-card--compact__date">{{ article.display_date }}</p>
+            <h3 class="news-card--compact__title">
+              <a href="{{ article.get_absolute_url }}">{{ article.title }}</a>
+            </h3>
+          </div>
+        </article>
+      </li>
+      {% endfor %}
+    </ul>
+    <div class="home-news-grid__footer">
+      <a class="btn btn--outline home-news-grid__all" href="/materialy/">
+        {% trans "Усі новини" %}
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="16" height="16">
+          <line x1="5" y1="12" x2="19" y2="12"/>
+          <polyline points="12 5 19 12 12 19"/>
+        </svg>
+      </a>
+    </div>
+  </section>
+  {% endif %}
+
   {% include 'partials/spo_panel.html' %}
 
   {% include 'partials/team_panel.html' %}
