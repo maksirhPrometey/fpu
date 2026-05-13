@@ -21,12 +21,20 @@
     {% for art in articles %}
     <li class="news-list__item">
       <article class="news-card">
-        {% if art.image_url %}
         <a class="news-card__img-link" href="{{ art.get_absolute_url }}" tabindex="-1" aria-hidden="true">
-          <img class="news-card__img" src="{{ art.image_url }}" alt="{{ art.title }}" loading="lazy" width="400"
-            height="225">
+          {% if art.image_url %}
+          <img class="news-card__img" src="{{ art.image_url }}" alt="{{ art.title }}" loading="lazy"
+               width="400" height="225">
+          {% else %}
+          <span class="news-card__no-img" aria-hidden="true">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
+              <polyline points="21 15 16 10 5 21"/>
+            </svg>
+          </span>
+          {% endif %}
         </a>
-        {% endif %}
         <div class="news-card__body">
           <time class="news-card__date" datetime="{{ art.published_at|date:'Y-m-d' }}">
             {{ art.display_date }}
