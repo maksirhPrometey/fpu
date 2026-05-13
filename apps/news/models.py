@@ -127,8 +127,15 @@ class Article(models.Model):
         if self.local_image:
             return f"/media/joomla_images/{self.local_image}"
         # Fallback: extract first inline image from body HTML
+        # Checks Cloudinary URLs first (body already rewritten), then fpsu.org.ua
         if self.body:
             import re as _re
+            m = _re.search(
+                r'src="(https://res\.cloudinary\.com/[^"]+)"',
+                self.body,
+            )
+            if m:
+                return m.group(1)
             m = _re.search(
                 r'src="(https?://(?:www\.)?fpsu\.org\.ua/images/[^"]+)"',
                 self.body,
