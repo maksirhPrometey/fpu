@@ -66,6 +66,8 @@ class GalleryAlbum(models.Model):
             local_path = Path(settings.MEDIA_ROOT) / "joomla_images" / self.cover_local
             if local_path.exists():
                 return f"/media/joomla_images/{self.cover_local}"
+            # Fallback: original Joomla server (still serves legacy images)
+            return f"https://www.fpsu.org.ua/{self.cover_local}"
         return ""
 
     @property
@@ -118,4 +120,6 @@ class GalleryPhoto(models.Model):
             local_path = Path(settings.MEDIA_ROOT) / "joomla_images" / self.image_local
             if local_path.exists():
                 return f"/media/joomla_images/{self.image_local}"
+            # Fallback: original Joomla server (still serves legacy images)
+            return f"https://www.fpsu.org.ua/{self.image_local}"
         return ""
