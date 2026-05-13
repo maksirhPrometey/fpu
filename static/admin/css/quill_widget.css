@@ -1,4 +1,5 @@
 /* ─── Quill editor widget — light + dark theme for Unfold admin ─────────── */
+/* Includes: editor base, upload overlay, image resize toolbar              */
 
 .quill-wrapper {
     position: relative;
@@ -290,4 +291,176 @@
 .dark .quill-upload-spinner {
     border-color: #334155;
     border-top-color: rgb(56 189 248);
+}
+
+/* ── Selected image highlight ─────────────────────────────────────────── */
+
+.quill-wrapper .ql-editor img.quill-img--selected {
+    outline: 2.5px solid rgb(14 165 233);
+    outline-offset: 2px;
+    border-radius: 8px;
+}
+
+.dark .quill-wrapper .ql-editor img.quill-img--selected {
+    outline-color: rgb(56 189 248);
+}
+
+/* ── Floating image toolbar ───────────────────────────────────────────── */
+
+.quill-img-toolbar {
+    position: absolute;
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    gap: 4px;
+    background: #ffffff;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 6px 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.06);
+    white-space: nowrap;
+    user-select: none;
+}
+
+.quill-img-toolbar__group {
+    display: flex;
+    gap: 3px;
+    align-items: center;
+}
+
+.quill-img-toolbar__sep {
+    width: 1px;
+    height: 20px;
+    background: #e5e7eb;
+    margin: 0 4px;
+    flex-shrink: 0;
+}
+
+.quill-img-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 10px;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 6px;
+    background: #f9fafb;
+    color: #374151;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.12s, border-color 0.12s, color 0.12s;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+.quill-img-btn:hover {
+    background: rgba(14, 165, 233, 0.08);
+    border-color: rgb(14 165 233);
+    color: rgb(2 132 199);
+}
+
+.quill-img-btn--active {
+    background: rgb(14 165 233);
+    border-color: rgb(14 165 233);
+    color: #ffffff;
+}
+
+.quill-img-btn--active:hover {
+    background: rgb(2 132 199);
+    border-color: rgb(2 132 199);
+    color: #ffffff;
+}
+
+.quill-img-btn--close {
+    padding: 4px 8px;
+    font-size: 15px;
+    font-weight: 400;
+    color: #9ca3af;
+    border-color: transparent;
+    background: transparent;
+    margin-left: 2px;
+}
+
+.quill-img-btn--close:hover {
+    background: #fee2e2;
+    border-color: #fca5a5;
+    color: #dc2626;
+}
+
+/* ── Dark mode: image toolbar ─────────────────────────────────────────── */
+
+@media (prefers-color-scheme: dark) {
+    .quill-img-toolbar {
+        background: #1e293b;
+        border-color: #334155;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+    }
+    .quill-img-toolbar__sep {
+        background: #334155;
+    }
+    .quill-img-btn {
+        background: #1e293b;
+        border-color: #374151;
+        color: #cbd5e1;
+    }
+    .quill-img-btn:hover {
+        background: rgba(56, 189, 248, 0.1);
+        border-color: rgb(56 189 248);
+        color: rgb(56 189 248);
+    }
+    .quill-img-btn--active {
+        background: rgb(56 189 248);
+        border-color: rgb(56 189 248);
+        color: #0f172a;
+    }
+    .quill-img-btn--close {
+        color: #64748b;
+        background: transparent;
+        border-color: transparent;
+    }
+    .quill-img-btn--close:hover {
+        background: rgba(239, 68, 68, 0.15);
+        border-color: rgba(239, 68, 68, 0.4);
+        color: #f87171;
+    }
+}
+
+.dark .quill-img-toolbar {
+    background: #1e293b;
+    border-color: #334155;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+}
+
+.dark .quill-img-toolbar__sep {
+    background: #334155;
+}
+
+.dark .quill-img-btn {
+    background: #1e293b;
+    border-color: #374151;
+    color: #cbd5e1;
+}
+
+.dark .quill-img-btn:hover {
+    background: rgba(56, 189, 248, 0.1);
+    border-color: rgb(56 189 248);
+    color: rgb(56 189 248);
+}
+
+.dark .quill-img-btn--active {
+    background: rgb(56 189 248);
+    border-color: rgb(56 189 248);
+    color: #0f172a;
+}
+
+.dark .quill-img-btn--close {
+    color: #64748b;
+    background: transparent;
+    border-color: transparent;
+}
+
+.dark .quill-img-btn--close:hover {
+    background: rgba(239, 68, 68, 0.15);
+    border-color: rgba(239, 68, 68, 0.4);
+    color: #f87171;
 }
