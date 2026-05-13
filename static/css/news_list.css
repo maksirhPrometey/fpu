@@ -60,15 +60,10 @@
   color: var(--c-text-muted);
 }
 
-.news-card__no-img {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.news-card__img--placeholder {
+  object-fit: cover;
   width: 100%;
   height: 100%;
-  min-height: 120px;
-  background: linear-gradient(135deg, var(--c-primary) 0%, var(--c-primary-700) 100%);
-  color: rgba(255, 255, 255, 0.35);
 }
 
 .news-card__cat {
