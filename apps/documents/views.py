@@ -6,7 +6,16 @@ from django.shortcuts import get_object_or_404, render
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_GET
 
+from apps.core.nav import NAV_SECTIONS
 from .models import Document, DocumentCategory
+
+# Відомі nav-slugs для документів → назви (stub замість 404)
+_DOC_NAV_LABELS: dict[str, str] = {}
+for _s in NAV_SECTIONS:
+    for _c in _s.get("children", []):
+        if _c["url"].startswith("/documents/"):
+            _slug = _c["url"].strip("/").rsplit("/", 1)[-1]
+            _DOC_NAV_LABELS[_slug] = str(_c["label"])
 
 
 @require_GET
@@ -30,7 +39,21 @@ def document_index(request: HttpRequest) -> HttpResponse:
 @require_GET
 def category_detail(request: HttpRequest, slug: str) -> HttpResponse:
     """Documents in a category."""
-    category = get_object_or_404(DocumentCategory, slug=slug)
+    try:
+        category = DocumentCategory.objects.get(slug=slug)
+    except DocumentCategory.DoesNotExist:
+        title = _DOC_NAV_LABELS.get(slug)
+        if title:
+            path = request.path
+            return render(request, "pages/stub.html", {
+                "page_title": title,
+                "breadcrumbs": [
+                    {"title": _("Головна"), "url": "/"},
+                    {"title": _("Документи ФПУ"), "url": "/documents/"},
+                    {"title": title, "url": path},
+                ],
+            })
+        return get_object_or_404(DocumentCategory, slug=slug)  # raise 404
     documents = Document.objects.filter(category=category, is_published=True).order_by("order", "-published_at")
     canonical = request.build_absolute_uri(category.get_absolute_url())
     context = {
