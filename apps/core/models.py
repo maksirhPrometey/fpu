@@ -213,6 +213,28 @@ class MemberOrganization(models.Model):
         super().save(*args, **kwargs)
 
 
+class JoinRequest(models.Model):
+    """Membership application submitted via 'Стати членом профспілки' form."""
+
+    name        = models.CharField(_("Повне ім'я"), max_length=150)
+    email       = models.EmailField(_("Email"))
+    phone       = models.CharField(_("Телефон"), max_length=30, blank=True)
+    workplace   = models.CharField(_("Місце роботи / підприємство"), max_length=200, blank=True)
+    profession  = models.CharField(_("Посада / професія"), max_length=150, blank=True)
+    message     = models.TextField(_("Додаткова інформація"), blank=True)
+    ip_address  = models.GenericIPAddressField(_("IP-адреса"), null=True, blank=True)
+    is_reviewed = models.BooleanField(_("Опрацьовано"), default=False)
+    created_at  = models.DateTimeField(_("Дата подачі"), auto_now_add=True)
+
+    class Meta:
+        verbose_name = _("Заявка на вступ")
+        verbose_name_plural = _("Заявки на вступ до профспілки")
+        ordering = ("-created_at",)
+
+    def __str__(self) -> str:
+        return f"{self.name} <{self.email}> — {self.created_at:%d.%m.%Y}"
+
+
 class ContactMessage(models.Model):
     """Incoming message from the contact form — stored for admin review."""
 

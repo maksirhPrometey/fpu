@@ -9,7 +9,7 @@ from django.shortcuts import get_object_or_404, render
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_GET, require_http_methods
 
-from apps.core.models import ContactMessage, MemOrgPage, PageSection, Priority, SiteSettings, TeamMember
+from apps.core.models import ContactMessage, JoinRequest, MemOrgPage, PageSection, Priority, SiteSettings, TeamMember
 from apps.core.utils import default_articles, default_priorities, default_team_members
 from apps.news.models import Article
 from apps.pages.models import StaticPage
@@ -372,6 +372,59 @@ def member_sites_page(request: HttpRequest) -> HttpResponse:
         ],
     }
     return render(request, "core/member_sites.html", context)
+
+
+@require_http_methods(["GET", "POST"])
+def join_request_page(request: HttpRequest) -> HttpResponse:
+    """Форма «Стати членом профспілки»."""
+    success = False
+    errors: dict[str, str] = {}
+    form_data: dict = {}
+
+    if request.method == "POST":
+        name      = request.POST.get("name", "").strip()
+        email     = request.POST.get("email", "").strip()
+        phone     = request.POST.get("phone", "").strip()
+        workplace = request.POST.get("workplace", "").strip()
+        profession = request.POST.get("profession", "").strip()
+        message   = request.POST.get("message", "").strip()
+
+        if not name:
+            errors["name"] = _("Введіть ваше повне ім'я")
+        if not email or "@" not in email:
+            errors["email"] = _("Введіть коректний email")
+
+        form_data = {
+            "name": name, "email": email, "phone": phone,
+            "workplace": workplace, "profession": profession, "message": message,
+        }
+
+        if not errors:
+            ip = request.META.get("REMOTE_ADDR", "")
+            JoinRequest.objects.create(
+                name=name, email=email, phone=phone,
+                workplace=workplace, profession=profession, message=message,
+                ip_address=ip or None,
+            )
+            success = True
+            form_data = {}
+
+    context = {
+        "success": success,
+        "errors": errors,
+        "form_data": form_data,
+        "page_meta_title": _("Стати членом профспілки"),
+        "page_meta_description": _(
+            "Подайте заявку на вступ до профспілки. "
+            "Федерація профспілок України захищає права і інтереси працівників."
+        ),
+        "breadcrumbs": [
+            {"title": _("Головна"), "url": "/"},
+            {"title": _("Напрями діяльності"), "url": "/napryamki-diyalnosti/"},
+            {"title": _("Стати членом профспілки"), "url": "/staty-chlenom-profspilky/"},
+        ],
+    }
+    return render(request, "core/join.html", context)
 
 
 @require_GET

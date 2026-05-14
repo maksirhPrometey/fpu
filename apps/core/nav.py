@@ -32,6 +32,7 @@ NAV_SECTIONS: list[dict] = [
             {"label": _("Соціальне страхування і пенсійне забезпечення"),           "url": "/napryamki-diyalnosti/sotsialne-strakhuvannya-i-pensijne-zabezpechennya/"},
             {"label": _("Соціальний діалог та колективно-договірне регулювання"),   "url": "/napryamki-diyalnosti/sotsialnij-dialog-ta-kolektivno-dogovirne-regulyuvannya/"},
             {"label": _("Організаційна робота"),                                    "url": "/napryamki-diyalnosti/organizatsijna-robota/"},
+            {"label": _("Стати членом профспілки"),                                "url": "/staty-chlenom-profspilky/"},
             {"label": _("Молодіжна політика"),                                      "url": "/napryamki-diyalnosti/molodizhna-politika/"},
             {"label": _("Інформаційна робота"),                                     "url": "/napryamki-diyalnosti/informatsijna-robota/"},
             {"label": _("Міжнародна робота"),                                       "url": "/napryamki-diyalnosti/mizhnarodna-robota/"},

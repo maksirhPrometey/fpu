@@ -7,11 +7,45 @@ from django.urls import reverse
 from django.utils.html import format_html
 from unfold.admin import ModelAdmin
 
-from .models import ContactMessage, MemOrgPage, MemberOrganization, PageSection, Priority, SiteSettings, TeamMember
+from .models import ContactMessage, JoinRequest, MemOrgPage, MemberOrganization, PageSection, Priority, SiteSettings, TeamMember
 
 admin.site.site_header = "Адмінпанель ФПУ"
 admin.site.site_title = "ФПУ Admin"
 admin.site.index_title = "Управління сайтом"
+
+
+@admin.register(JoinRequest)
+class JoinRequestAdmin(ModelAdmin):
+    list_display = ("created_at", "name", "email", "phone", "workplace_short", "is_reviewed")
+    list_editable = ("is_reviewed",)
+    list_filter = ("is_reviewed", "created_at")
+    search_fields = ("name", "email", "phone", "workplace", "profession")
+    readonly_fields = ("name", "email", "phone", "workplace", "profession", "message", "ip_address", "created_at")
+    ordering = ("-created_at",)
+    list_per_page = 50
+    date_hierarchy = "created_at"
+
+    fieldsets = (
+        (None, {
+            "fields": ("created_at", "is_reviewed"),
+        }),
+        ("Заявник", {
+            "fields": ("name", "email", "phone", "ip_address"),
+        }),
+        ("Місце роботи", {
+            "fields": ("workplace", "profession"),
+        }),
+        ("Додаткова інформація", {
+            "fields": ("message",),
+        }),
+    )
+
+    def has_add_permission(self, request) -> bool:
+        return False
+
+    @admin.display(description="Місце роботи")
+    def workplace_short(self, obj: JoinRequest) -> str:
+        return obj.workplace[:50] + "…" if len(obj.workplace) > 50 else obj.workplace or "—"
 
 
 @admin.register(ContactMessage)

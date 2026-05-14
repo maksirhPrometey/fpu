@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}{% trans "Стати членом профспілки" %} — {% trans "Федерація Профспілок України" %}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/forms.css' %}">
+{% endblock %}
+
+{% block page_banner %}
+<div class="page-banner">
+  <div class="page-banner__inner">
+    <nav class="page-banner__breadcrumb breadcrumb" aria-label="{% trans 'Навігація' %}">
+      <ol class="breadcrumb__list">
+        <li class="breadcrumb__item"><a class="breadcrumb__link" href="/">{% trans "Головна" %}</a></li>
+        <li class="breadcrumb__item"><a class="breadcrumb__link" href="/napryamki-diyalnosti/">{% trans "Напрями діяльності" %}</a></li>
+        <li class="breadcrumb__item"><span class="breadcrumb__current">{% trans "Стати членом профспілки" %}</span></li>
+      </ol>
+    </nav>
+    <h1 class="page-banner__title">{% trans "Стати членом профспілки" %}</h1>
+  </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="contact-page">
+
+  <div class="contact-form-section">
+
+    <div class="join-intro">
+      <p>{% blocktrans %}Профспілка — це організація, яка захищає трудові права та законні інтереси кожного працівника. Заповніть форму нижче, і ми зв'яжемося з вами для оформлення членства.{% endblocktrans %}</p>
+      <ul class="join-intro__list">
+        <li>{% trans "Захист прав при звільненні та скороченні" %}</li>
+        <li>{% trans "Допомога у трудових спорах" %}</li>
+        <li>{% trans "Участь у колективних переговорах" %}</li>
+        <li>{% trans "Матеріальна допомога та соціальний захист" %}</li>
+      </ul>
+    </div>
+
+    {% if success %}
+      <div class="form-success" role="alert">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+        {% trans "Вашу заявку прийнято! Ми зв'яжемося з вами найближчим часом." %}
+      </div>
+    {% else %}
+
+      <h2 class="contact-form-section__title">{% trans "Подати заявку на вступ" %}</h2>
+
+      <form class="contact-form" method="post" action="{% url 'core:join' %}" novalidate>
+        {% csrf_token %}
+
+        <div class="form-row form-row--2">
+          <div class="form-group {% if errors.name %}has-error{% endif %}">
+            <label class="form-label" for="id_name">{% trans "Повне ім'я" %} <span aria-hidden="true">*</span></label>
+            <input class="form-control" type="text" id="id_name" name="name"
+                   value="{{ form_data.name|default:'' }}"
+                   autocomplete="name" required
+                   aria-describedby="{% if errors.name %}name-error{% endif %}">
+            {% if errors.name %}
+              <span class="form-error-msg" id="name-error" role="alert">{{ errors.name }}</span>
+            {% endif %}
+          </div>
+
+          <div class="form-group {% if errors.email %}has-error{% endif %}">
+            <label class="form-label" for="id_email">Email <span aria-hidden="true">*</span></label>
+            <input class="form-control" type="email" id="id_email" name="email"
+                   value="{{ form_data.email|default:'' }}"
+                   autocomplete="email" required
+                   aria-describedby="{% if errors.email %}email-error{% endif %}">
+            {% if errors.email %}
+              <span class="form-error-msg" id="email-error" role="alert">{{ errors.email }}</span>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="id_phone">{% trans "Телефон" %}</label>
+          <input class="form-control" type="tel" id="id_phone" name="phone"
+                 value="{{ form_data.phone|default:'' }}" autocomplete="tel">
+        </div>
+
+        <div class="form-row form-row--2">
+          <div class="form-group">
+            <label class="form-label" for="id_workplace">{% trans "Місце роботи / підприємство" %}</label>
+            <input class="form-control" type="text" id="id_workplace" name="workplace"
+                   value="{{ form_data.workplace|default:'' }}">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="id_profession">{% trans "Посада / професія" %}</label>
+            <input class="form-control" type="text" id="id_profession" name="profession"
+                   value="{{ form_data.profession|default:'' }}">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="id_message">{% trans "Додаткова інформація" %}</label>
+          <textarea class="form-control form-control--textarea" id="id_message" name="message"
+                    rows="4" placeholder="{% trans 'Якщо є питання або побажання — напишіть тут' %}">{{ form_data.message|default:'' }}</textarea>
+        </div>
+
+        <button class="btn btn--primary form-submit" type="submit">
+          {% trans "Надіслати заявку" %}
+        </button>
+      </form>
+
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}

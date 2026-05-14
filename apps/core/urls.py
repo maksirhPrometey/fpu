@@ -13,6 +13,7 @@ urlpatterns = [
     path("search/", views.search, name="search"),
     path("contacts/", views.contact, name="contact"),
     path("novini/", news_views.all_news, name="all_news"),
+    path("staty-chlenom-profspilky/", views.join_request_page, name="join"),
     re_path(r"^sajty-chlenskykh-orhanizatsii/?$", views.member_sites_page, name="member_sites"),
     path("chlenski-orhanizatsii/<slug:slug>/", views.mem_org_detail, name="mem_org_detail"),
     re_path(r"^spo-ob-?iednan-profspilok/?$", views.spo_page, name="spo"),
