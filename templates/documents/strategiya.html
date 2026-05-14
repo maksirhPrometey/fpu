@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% load i18n static %}
+
+{% block title %}{% trans "Стратегія діяльності ФПУ на 2021–2026 роки" %} — {% trans "ФПУ" %}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/documents.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="doc-page">
+
+  <div class="doc-page__inner">
+
+    <nav class="breadcrumb" aria-label="{% trans 'Хлібні крихти' %}">
+      {% for crumb in breadcrumbs %}
+        {% if not forloop.last %}
+          <a class="breadcrumb__link" href="{{ crumb.url }}">{{ crumb.title }}</a>
+          <span class="breadcrumb__sep" aria-hidden="true">›</span>
+        {% else %}
+          <span class="breadcrumb__current" aria-current="page">{{ crumb.title }}</span>
+        {% endif %}
+      {% endfor %}
+    </nav>
+
+    <h1 class="doc-page__title">{% trans "Стратегія діяльності ФПУ на 2021–2026 роки" %}</h1>
+    <p class="doc-page__subtitle">{% trans "«Час дій та якісних змін»" %}</p>
+
+    <div class="doc-page__body">
+      <p>
+        {% blocktrans %}Стратегія діяльності Федерації профспілок України на 2021–2026 роки затверджена VIII З'їздом ФПУ (Постанова № 8з-8). Документ визначає пріоритетні напрями роботи Федерації на п'ятирічний період та орієнтир для всіх членських організацій.{% endblocktrans %}
+      </p>
+
+      <h2>{% trans "Ключові напрями Стратегії" %}</h2>
+      <ul class="doc-page__list">
+        <li>{% trans "Захист трудових прав та соціально-економічних інтересів членів профспілок" %}</li>
+        <li>{% trans "Розвиток соціального діалогу та колективно-договірного регулювання" %}</li>
+        <li>{% trans "Зміцнення організаційної єдності та профспілкового руху" %}</li>
+        <li>{% trans "Активізація міжнародної діяльності та інтеграція в міжнародний профспілковий рух" %}</li>
+        <li>{% trans "Розвиток інформаційної політики та цифрової комунікації" %}</li>
+        <li>{% trans "Молодіжна профспілкова політика та залучення нових членів" %}</li>
+      </ul>
+
+      <div class="doc-page__download-box">
+        <svg class="doc-page__download-icon" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+             stroke-linejoin="round" aria-hidden="true">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="12" y1="11" x2="12" y2="17"/>
+          <polyline points="9 14 12 17 15 14"/>
+        </svg>
+        <div class="doc-page__download-info">
+          <span class="doc-page__download-name">{% trans "Стратегія діяльності ФПУ на 2021–2026 роки" %}</span>
+          <span class="doc-page__download-meta">PDF, Adobe Acrobat</span>
+        </div>
+        <a class="doc-page__download-btn btn btn--primary"
+           href="https://www.fpsu.org.ua/images/documents/%D0%A1%D0%A2%D0%A0%D0%90%D0%A2%D0%95%D0%93%D0%86%D0%AF_web.pdf"
+           target="_blank"
+           rel="noopener noreferrer"
+           download>
+          {% trans "Завантажити PDF" %}
+        </a>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

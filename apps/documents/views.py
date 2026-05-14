@@ -42,15 +42,23 @@ def category_detail(request: HttpRequest, slug: str) -> HttpResponse:
     try:
         category = DocumentCategory.objects.get(slug=slug)
     except DocumentCategory.DoesNotExist:
+        # Спеціальна сторінка для Стратегії
+        if slug == "strategiya-diyalnosti-fpu":
+            return render(request, "documents/strategiya.html", {
+                "breadcrumbs": [
+                    {"title": _("Головна"), "url": "/"},
+                    {"title": _("Документи ФПУ"), "url": "/documents/"},
+                    {"title": _("Стратегія діяльності ФПУ на 2021–2026"), "url": request.path},
+                ],
+            })
         title = _DOC_NAV_LABELS.get(slug)
         if title:
-            path = request.path
             return render(request, "pages/stub.html", {
                 "page_title": title,
                 "breadcrumbs": [
                     {"title": _("Головна"), "url": "/"},
                     {"title": _("Документи ФПУ"), "url": "/documents/"},
-                    {"title": title, "url": path},
+                    {"title": title, "url": request.path},
                 ],
             })
         return get_object_or_404(DocumentCategory, slug=slug)  # raise 404

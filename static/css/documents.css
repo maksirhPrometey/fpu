@@ -224,3 +224,119 @@
     justify-content: center;
   }
 }
+
+/* ── Окрема сторінка документа (напр. Стратегія) ───────────────────────── */
+.doc-page {
+  padding: var(--sp-40) var(--sp-24) var(--sp-64);
+}
+
+.doc-page__inner {
+  max-width: 860px;
+  margin-inline: auto;
+}
+
+.doc-page__title {
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 800;
+  color: var(--c-primary);
+  margin: var(--sp-24) 0 var(--sp-8);
+  line-height: 1.25;
+}
+
+.doc-page__subtitle {
+  font-size: 1.125rem;
+  color: var(--c-accent);
+  font-style: italic;
+  margin: 0 0 var(--sp-32);
+}
+
+.doc-page__body {
+  line-height: 1.75;
+  color: var(--c-text);
+}
+
+.doc-page__body p {
+  margin: 0 0 var(--sp-20);
+}
+
+.doc-page__body h2 {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--c-primary);
+  margin: var(--sp-32) 0 var(--sp-16);
+  padding-bottom: var(--sp-8);
+  border-bottom: 2px solid var(--c-border);
+}
+
+.doc-page__list {
+  padding-left: 1.5rem;
+  margin: 0 0 var(--sp-32);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-8);
+}
+
+.doc-page__list li {
+  line-height: 1.6;
+}
+
+/* ── Download box ──────────────────────────────────────────────────────── */
+.doc-page__download-box {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-16);
+  background: var(--c-bg-alt, #f4f6fb);
+  border: 1px solid var(--c-border);
+  border-left: 4px solid var(--c-accent);
+  border-radius: var(--radius-md, 8px);
+  padding: var(--sp-20) var(--sp-24);
+  margin-top: var(--sp-32);
+}
+
+.doc-page__download-icon {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  color: var(--c-accent);
+}
+
+.doc-page__download-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.doc-page__download-name {
+  font-weight: 600;
+  font-size: 0.9375rem;
+  color: var(--c-text);
+}
+
+.doc-page__download-meta {
+  font-size: 0.8125rem;
+  color: var(--c-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.doc-page__download-btn {
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+@media (max-width: 600px) {
+  .doc-page__download-box {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .doc-page__download-btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .doc-page {
+    padding: var(--sp-24) var(--sp-16) var(--sp-40);
+  }
+}
