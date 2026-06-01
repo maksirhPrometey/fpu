@@ -193,7 +193,7 @@ def spo_page(request: HttpRequest) -> HttpResponse:
             | Q(category__title__icontains="СПО")
         )
         .select_related("category")
-        .order_by("-published_at")[:20]
+        .order_by("-published_at")[:10]
     )
 
     spo_doc_categories = list(
@@ -206,13 +206,33 @@ def spo_page(request: HttpRequest) -> HttpResponse:
         ).order_by("-published_at", "-created_at")[:10]
     ) if spo_doc_categories else []
 
+    # Leadership team — hardcoded per user specification
+    class _Person:
+        def __init__(self, full_name: str, role: str) -> None:
+            self.full_name = full_name
+            self.role = role
+            self.photo_url = ""
+
+        @property
+        def initials(self) -> str:
+            parts = self.full_name.split()
+            return "".join(p[0].upper() for p in parts[:2] if p)
+
+    spo_team = [
+        _Person("Бизов Сергій Сергійович", "Голова ФПУ"),
+        _Person("Москаленко Ігор Іванович", "Заступник Голови ФПУ"),
+        _Person("Драп'ятий Євген Михайлович", "Заступник Голови ФПУ"),
+        _Person("Андреєв Василь Миколайович", "Заступник Голови ФПУ"),
+    ]
+
     context = {
         "spo_articles": spo_articles,
         "spo_docs": spo_docs,
+        "spo_team": spo_team,
         "page_meta_title": "СПО об'єднань профспілок",
         "page_meta_description": (
-            "Матеріали та рішення Спільного представницького органу "
-            "сторони профспілок у Національній тристоронній соціально-економічній раді."
+            "Спільний представницький орган репрезентативних всеукраїнських "
+            "об'єднань профспілок на національному рівні."
         ),
         "breadcrumbs": [
             {"title": "Головна", "url": "/"},
