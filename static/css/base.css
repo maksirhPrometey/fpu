@@ -284,3 +284,24 @@ select {
     padding: var(--sp-10, 0.625rem) var(--sp-20);
   }
 }
+/* ── Dev banner ─────────────────────────────────────────────── */
+.dev-banner {
+  position: sticky;
+  top: 0;
+  z-index: 9999;
+  background: #c0392b;
+  color: #fff;
+  text-align: center;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  padding: 0.55rem 1rem;
+  line-height: 1.3;
+}
+
+@media (max-width: 600px) {
+  .dev-banner {
+    font-size: 0.8rem;
+    padding: 0.45rem 0.75rem;
+  }
+}
