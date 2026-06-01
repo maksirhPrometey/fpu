@@ -101,28 +101,20 @@ class FallbackTeamMember:
 def default_team_members() -> list[FallbackTeamMember]:
     return [
         FallbackTeamMember(
-            full_name=str(_("Григорій Осовий")),
-            role=str(_("Голова Федерації Профспілок України")),
+            full_name="Бизов Сергій Сергійович",
+            role="Голова ФПУ",
         ),
         FallbackTeamMember(
-            full_name=str(_("Катерина Бондаренко")),
-            role=str(_("Заступник Голови")),
+            full_name="Москаленко Ігор Іванович",
+            role="Заступник Голови ФПУ",
         ),
         FallbackTeamMember(
-            full_name=str(_("Олексій Мірошниченко")),
-            role=str(_("Керівник правового відділу")),
+            full_name="Драп'ятий Євген Михайлович",
+            role="Заступник Голови ФПУ",
         ),
         FallbackTeamMember(
-            full_name=str(_("Тетяна Коваль")),
-            role=str(_("Начальник відділу охорони праці")),
-        ),
-        FallbackTeamMember(
-            full_name=str(_("Сергій Захаренко")),
-            role=str(_("Директор з міжнародних відносин")),
-        ),
-        FallbackTeamMember(
-            full_name=str(_("Оксана Петренко")),
-            role=str(_("Прес-секретар ФПУ")),
+            full_name="Андреєв Василь Миколайович",
+            role="Заступник Голови ФПУ",
         ),
     ]
 

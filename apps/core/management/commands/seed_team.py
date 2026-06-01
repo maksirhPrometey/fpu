@@ -1,4 +1,4 @@
-"""Seed FPU leadership team members from public information."""
+"""Seed / reset FPU leadership team members."""
 from __future__ import annotations
 
 from django.core.management.base import BaseCommand
@@ -7,26 +7,26 @@ from apps.core.models import TeamMember
 
 TEAM = [
     {
-        "full_name": "Сергій Бизов",
-        "role": "Голова Федерації профспілок України",
-        "bio": "Очолює Федерацію профспілок України. Займається захистом трудових прав, "
-               "соціальним діалогом та міжнародним співробітництвом.",
+        "full_name": "Бизов Сергій Сергійович",
+        "role": "Голова ФПУ",
+        "bio": "Очолює Федерацію профспілок України. Захищає трудові права, "
+               "веде соціальний діалог та міжнародне співробітництво.",
         "order": 1,
     },
     {
-        "full_name": "Олег Осіпенко",
-        "role": "Перший заступник Голови ФПУ",
-        "bio": "Координує роботу з правового захисту та колективно-договірного регулювання.",
+        "full_name": "Москаленко Ігор Іванович",
+        "role": "Заступник Голови ФПУ",
+        "bio": "Координує правовий захист та колективно-договірне регулювання.",
         "order": 2,
     },
     {
-        "full_name": "Валентина Жайворон",
+        "full_name": "Драп'ятий Євген Михайлович",
         "role": "Заступник Голови ФПУ",
         "bio": "Відповідає за організаційну роботу та взаємодію з членськими організаціями.",
         "order": 3,
     },
     {
-        "full_name": "Сергій Українець",
+        "full_name": "Андреєв Василь Миколайович",
         "role": "Заступник Голови ФПУ",
         "bio": "Координує питання охорони праці, безпеки виробництва та соціального страхування.",
         "order": 4,
@@ -35,21 +35,16 @@ TEAM = [
 
 
 class Command(BaseCommand):
-    help = "Seed FPU team members."
+    help = "Reset FPU team members to current leadership."
 
     def handle(self, *args, **options) -> None:
-        created = 0
+        TeamMember.objects.all().delete()
         for data in TEAM:
-            _, was_created = TeamMember.objects.get_or_create(
+            TeamMember.objects.create(
                 full_name=data["full_name"],
-                defaults={
-                    "role": data["role"],
-                    "bio": data["bio"],
-                    "order": data["order"],
-                    "is_active": True,
-                },
+                role=data["role"],
+                bio=data["bio"],
+                order=data["order"],
+                is_active=True,
             )
-            if was_created:
-                created += 1
-
-        self.stdout.write(self.style.SUCCESS(f"Done: {created} team members created."))
+        self.stdout.write(self.style.SUCCESS(f"Done: {len(TEAM)} team members set."))
