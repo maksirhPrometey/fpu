@@ -12,10 +12,9 @@
 |---|---|---|---|
 | `fpsu_seo_dump.sql` | ~280 MB | MySQL dump з Joomla сервера | крок 0 (генерація JSON) |
 | `cats.tsv` | ~50 KB | MySQL export (see SQL below) | `import_joomla` |
-| `articles.tsv` | ~5 MB | MySQL export (see SQL below) | `import_joomla`, `import_images` |
+| `articles.tsv` | ~5 MB | MySQL export (see SQL below) | `import_joomla`, `link_article_covers` |
 | `content_bodies.json` | ~244 MB | генерується `parse_bodies.py` | `import_bodies`, `import_missing_articles` |
 | `menu.tsv` | ~200 KB | MySQL export (see SQL below) | `import_pages`, `import_bodies --pages` |
-| `image_paths.txt` | ~1 MB | генерується `_build_image_list.py` | `import_images` |
 | `seo_inventory.json` | ~26 MB | генерується `parse_joomla_dump.py` | аналіз SEO |
 
 ---
@@ -85,75 +84,26 @@ python manage.py import_missing_articles --rewrite-images
 python manage.py import_pages
 python manage.py import_bodies --pages --rewrite-images
 python manage.py seed_section_pages
-python manage.py link_article_covers   # потребує articles.tsv
+python manage.py link_article_covers   # потребує articles.tsv + media/joomla_images/
 ```
 
 ---
 
-## Зображення до Cloudinary (ОБОВ'ЯЗКОВО для Render)
+## Зображення на VPS
 
-Render має ephemeral filesystem — `media/` не зберігається між деплоями.
-Усі зображення мають бути завантажені до Cloudinary.
-
-### Крок A. Збери список файлів (локально, потрібна папка `media/`)
-```bash
-python tools/build_image_paths.py
-# → tools/image_paths.txt (44к+ шляхів)
-```
-
-### Крок B. Заповни реальні credentials у `.env`
-```
-CLOUDINARY_URL=cloudinary://<api_key>:<api_secret>@<cloud_name>
-CLOUDINARY_CLOUD_NAME=<cloud_name>
-CLOUDINARY_API_KEY=<api_key>
-CLOUDINARY_API_SECRET=<api_secret>
-```
-
-### Крок C. Завантаж до Cloudinary (локально)
-```bash
-python tools/upload_images_cloudinary.py
-# За замовчуванням — лише 1000 нових файлів за запуск (тест). Повторні запуски докидають map.
-python tools/upload_images_cloudinary.py --limit 0   # усі залишкові з image_paths.txt
-# → tools/image_map.json (атомарний запис, flock, resume)
-# Довгий запуск: caffeinate -i python tools/upload_images_cloudinary.py --limit 0
-```
-
-### Крок D. Застосуй map до БД
-```bash
-python manage.py apply_cloudinary_map
-# Оновлює Article.image + переписує body HTML на Cloudinary URLs
-```
-
-### Крок E. Закомітити image_map.json
-```bash
-git add tools/image_map.json
-git commit -m "chore: add Cloudinary image map"
-git push
-```
-
-### На Render після пушу:
-```bash
-# В Render Shell (один раз):
-python manage.py apply_cloudinary_map
-```
-
----
-
-## На Render (Shell консоль)
-
-Якщо файли великі — завантажуй через wget/curl з тимчасового хостингу:
+Медіа зберігаються локально в `media/` (Docker volume). Після rsync з Joomla:
 
 ```bash
-# В Render Shell:
-cd /opt/render/project/src
-mkdir -p tools/data
+# На сервері (Docker):
+docker compose -f docker-compose.yml -f docker-compose.prod.yml exec web \
+  python manage.py link_article_covers
 
-# Завантаж файли (замін URL на свої):
-wget -O tools/data/cats.tsv     "https://YOUR_STORAGE/cats.tsv"
-wget -O tools/data/articles.tsv "https://YOUR_STORAGE/articles.tsv"
-wget -O tools/data/menu.tsv     "https://YOUR_STORAGE/menu.tsv"
-wget -O tools/data/content_bodies.json "https://YOUR_STORAGE/content_bodies.json"
+# Або повний імпорт з архіву даних:
+DATA_ARCHIVE_URL=https://.../fpu_data.tar.gz ./seed_all.sh
+```
 
-# Запуск:
-python manage.py import_all
+Для синхронізації з Joomla-сервера (локально):
+
+```bash
+./tools/fetch_from_remote.sh
 ```

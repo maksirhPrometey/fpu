@@ -1,4 +1,4 @@
-"""Gallery models — albums and photos stored in Cloudinary."""
+"""Gallery models — albums and photos with local media paths."""
 from __future__ import annotations
 
 from django.db import models

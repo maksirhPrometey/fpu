@@ -25,7 +25,6 @@ fpu_data.tar.gz
 # Generated tool artifacts — regeneratable, not needed in git
 tools/image_paths.txt
 tools/image_map.json
-tools/.upload_images_cloudinary.lock
 
 # Personal skill/notes files — not project code
 admin_skill.md

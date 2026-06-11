@@ -1,7 +1,7 @@
 """Base settings shared across environments.
 
 Loads configuration from environment variables (.env in development,
-real env vars on Render in production). NEVER hardcode secrets here.
+real env vars on the server in production). NEVER hardcode secrets here.
 """
 from __future__ import annotations
 
@@ -134,7 +134,7 @@ DATABASES = {
     "default": env.db("DATABASE_URL", default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}"),
 }
 
-# TCP keepalive prevents Render Free Postgres from dropping SSL connections
+# TCP keepalive prevents PostgreSQL from dropping SSL connections
 # during long bulk operations (loaddata / load_fixtures with large fixtures).
 if DATABASES["default"].get("ENGINE", "").endswith("psycopg2"):
     DATABASES["default"].setdefault("OPTIONS", {}).update({
@@ -182,7 +182,7 @@ MEDIA_ROOT = BASE_DIR / "media"
 DEFAULT_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
 
 # ── Cache ──────────────────────────────────────────────────────────────────────
-# REDIS_URL береться з env (Render надає при підключенні Redis-сервісу).
+# REDIS_URL береться з env (опційно, для rate-limiting контактної форми).
 # Без Redis падаємо на LocMemCache (dev/тести/перший деплой без Redis).
 _redis_url = env("REDIS_URL", default="")
 if _redis_url:

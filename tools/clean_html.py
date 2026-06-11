@@ -76,7 +76,7 @@ def strip_inline_styles(html: str) -> str:
 
 
 def fix_image_paths(html: str, image_map: dict[str, str]) -> str:
-    """Replace Joomla-relative image paths with Cloudinary URLs."""
+    """Replace Joomla-relative image paths with mapped URLs."""
     if not image_map:
         return html
 

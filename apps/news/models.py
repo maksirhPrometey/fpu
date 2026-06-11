@@ -1,4 +1,4 @@
-"""News models — Category and Article, images stored in Cloudinary."""
+"""News models — Category and Article with local media paths."""
 from __future__ import annotations
 
 from django.db import models

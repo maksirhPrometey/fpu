@@ -22,9 +22,8 @@ tools/
 ├── merge_articles.py        ← об'єднує дублікати статей
 ├── clean_html.py            ← очищає HTML тіла статей
 ├── convert_to_webp.py       ← конвертує зображення в WebP
-├── replace_image_paths.py   ← замінює шляхи зображень у HTML
-├── upload_images_cloudinary.py ← завантажує зображення в Cloudinary
 ├── verify_urls.py           ← перевіряє доступність URL
+├── fetch_from_remote.sh     ← стягнути dump + TSV з Joomla-сервера
 └── _server_dump.py          ← утиліта dump з Joomla сервера
 ```
 
@@ -41,13 +40,10 @@ python manage.py import_all --dry-run
 # 3. Реальний імпорт:
 python manage.py import_all
 
-# 4. Зображення в Cloudinary (потрібен SSH ключ):
-python manage.py import_images --ssh-key key_dig_priv.pem
+# 4. Обкладинки статей (локальні WebP з media/joomla_images/):
+python manage.py link_article_covers
 
-# 5. Зображення з тіл статей:
-python manage.py import_body_images --workers 8
-
-# 6. Документи:
+# 5. Документи:
 python manage.py seed_documents
 ```
 
@@ -64,6 +60,35 @@ python manage.py seed_documents
 | 5 | `import_bodies --pages` | Тіла для статичних сторінок |
 | 6 | `seed_section_pages` | Навігаційні розділи (хардкожено) |
 | 7 | `import_gallery` | Альбоми + фото |
-| 8 | `import_images` | Обкладинки статей → Cloudinary |
-| 9 | `import_body_images` | Зображення з тіл → Cloudinary |
-| 10 | `seed_documents` | Документи ФПУ |
+| 8 | `link_article_covers` | Обкладинки статей → Article.local_image |
+| 9 | `seed_documents` | Документи ФПУ |
+
+---
+
+## Синхронізація з живими джерелами
+
+```bash
+python manage.py sync_spo_home       # блоки spo.fpsu.org.ua на головній
+python manage.py sync_spo_blog       # блог SPO
+python manage.py sync_menu_news_live # новини з меню
+python manage.py audit_media         # перевірка доступності медіа
+```
+
+---
+
+## Зображення на сервері
+
+Медіафайли зберігаються локально в `media/` (Docker volume `media_volume`).
+Після rsync з Joomla-сервера:
+
+```bash
+# Локально або на VPS:
+python manage.py link_article_covers
+python manage.py import_gallery
+```
+
+Для синхронізації з Joomla-сервера:
+
+```bash
+./tools/fetch_from_remote.sh
+```

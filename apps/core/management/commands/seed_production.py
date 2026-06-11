@@ -20,7 +20,7 @@ is NOT imported here — those files are large and excluded from the repo.
 Run `python manage.py import_all` manually after uploading data files to the server.
 
 Usage:
-    python manage.py seed_production           # called from build.sh
+    python manage.py seed_production           # called from deploy/entrypoint.sh / seed_all.sh
     python manage.py seed_production --force   # re-seed even if data exists
 """
 from __future__ import annotations

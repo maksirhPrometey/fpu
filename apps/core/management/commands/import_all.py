@@ -15,7 +15,6 @@ Pipeline steps
   6. seed_section_pages      Navigation section pages with hand-crafted HTML
   7. import_gallery          GalleryAlbum + GalleryPhoto
   8. link_article_covers     Article.local_image from articles.tsv cover images
-  9. apply_cloudinary_map    Apply image_map.json → Article.image + body rewrite
 
 Flags
 ─────
@@ -23,7 +22,7 @@ Flags
   --skip-articles     Skip steps 1–3.
   --skip-pages        Skip steps 4–6.
   --skip-gallery      Skip step 7.
-  --skip-images       Skip steps 8–9 (image linking and Cloudinary mapping).
+  --skip-images       Skip step 8 (link_article_covers).
   --no-rewrite-images Disable /images/ → fpsu.org.ua rewriting in bodies
                       (steps 2, 3, 5). Default: rewriting is ON.
 
@@ -70,7 +69,7 @@ class Command(BaseCommand):
         parser.add_argument(
             "--skip-images",
             action="store_true",
-            help="Skip steps 8–9 (link_article_covers, apply_cloudinary_map).",
+            help="Skip step 8 (link_article_covers).",
         )
         parser.add_argument(
             "--no-rewrite-images",
@@ -143,13 +142,12 @@ class Command(BaseCommand):
             self._section("Step 7 — import gallery albums + photos")
             self._run("import_gallery", dry_run=dry_run)
 
-        # ── Steps 8–9: Images ─────────────────────────────────────────────────
+        # ── Step 8: Images ────────────────────────────────────────────────────
         if skip_images:
-            self.stdout.write("Skipping image steps (--skip-images).")
+            self.stdout.write("Skipping image step (--skip-images).")
         else:
             from pathlib import Path as _Path
             arts_tsv = _Path(__file__).resolve().parents[4] / "tools" / "data" / "articles.tsv"
-            image_map = _Path(__file__).resolve().parents[4] / "tools" / "image_map.json"
 
             if arts_tsv.exists():
                 self._section("Step 8 — link article cover images from articles.tsv")
@@ -161,18 +159,6 @@ class Command(BaseCommand):
                         "  Export from MySQL: mysql ... -e 'SELECT id,alias,catid,title,"
                         "metadesc,metakey,images,publish_up FROM zeki2_content WHERE state=1'"
                         " > tools/data/articles.tsv"
-                    )
-                )
-
-            if image_map.exists():
-                self._section("Step 9 — apply Cloudinary image map to bodies + covers")
-                self._run("apply_cloudinary_map", dry_run=dry_run)
-            else:
-                self.stdout.write(
-                    self.style.WARNING(
-                        "  tools/image_map.json not found — skipping apply_cloudinary_map.\n"
-                        "  Run: python tools/build_image_paths.py && "
-                        "python tools/upload_images_cloudinary.py"
                     )
                 )
 
