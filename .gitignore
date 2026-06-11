@@ -13,18 +13,24 @@ staticfiles/
 logo.png
 
 # SQL dumps and large data files — never commit
-# All raw import data lives in tools/data/ (git-ignored except .gitkeep, README.md, fixtures)
+# All raw import data lives in tools/data/ (git-ignored except .gitkeep, README.md)
+# fixtures.json.gz — store on GitHub Releases or Cloudflare R2, not in git
 tools/data/*
 !tools/data/.gitkeep
 !tools/data/README.md
-!tools/data/fixtures.json.gz
 
 # Data archive for deployment (generated locally, uploaded to GitHub Releases)
 fpu_data.tar.gz
 
 # Generated tool artifacts — regeneratable, not needed in git
 tools/image_paths.txt
+tools/image_map.json
 tools/.upload_images_cloudinary.lock
+
+# Personal skill/notes files — not project code
+admin_skill.md
+parsing_data_remote_server.md
+ТЗ_FPSU_*.txt
 
 # Large data files generated locally — never commit
 tools/fpsu_full_dump.sql
