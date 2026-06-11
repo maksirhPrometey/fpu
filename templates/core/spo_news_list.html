@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block body_class %}page page--spo{% endblock %}
+
+{% block title %}{% trans "Новини СПО" %} — {% trans "Федерація Профспілок України" %}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/news_list.css' %}">
+<link rel="stylesheet" href="{% static 'css/spo.css' %}">
+{% endblock %}
+
+{% block page_banner %}
+<div class="page-banner">
+  <div class="page-banner__inner">
+    <nav class="page-banner__breadcrumb breadcrumb" aria-label="{% trans 'Навігація' %}">
+      <ol class="breadcrumb__list">
+        {% for crumb in breadcrumbs %}
+        <li class="breadcrumb__item">
+          {% if forloop.last %}
+          <span class="breadcrumb__current" aria-current="page">{{ crumb.title }}</span>
+          {% else %}
+          <a class="breadcrumb__link" href="{{ crumb.url }}">{{ crumb.title }}</a>
+          {% endif %}
+        </li>
+        {% endfor %}
+      </ol>
+    </nav>
+    <h1 class="page-banner__title">{% trans "Новини" %}</h1>
+  </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="content-wrap spo-news-page">
+  {% if articles %}
+  <ul class="blog-list" aria-label="{% trans 'Новини СПО' %}">
+    {% for art in articles %}
+    <li class="blog-list__item">
+      <article class="blog-item">
+        <header class="blog-item__header">
+          <h2 class="blog-item__title">
+            <a class="blog-item__title-link" href="{{ art.get_absolute_url }}">{{ art.title }}</a>
+          </h2>
+          <p class="blog-item__meta">
+            <time class="blog-item__date" datetime="{{ art.published_at|date:'Y-m-d' }}">{{ art.display_date }}</time>
+          </p>
+        </header>
+        <div class="blog-item__row{% if not art.listing_image_url and not art.image_url %} blog-item__row--no-image{% endif %}">
+          {% if art.listing_image_url or art.image_url %}
+          <a class="blog-item__image-link" href="{{ art.get_absolute_url }}" tabindex="-1" aria-hidden="true">
+            <img class="blog-item__image"
+                 src="{{ art.listing_image_url|default:art.image_url }}"
+                 alt="" loading="lazy" width="180" height="135">
+          </a>
+          {% endif %}
+          {% if art.listing_excerpt %}
+          <p class="blog-item__excerpt">
+            <a class="blog-item__excerpt-link" href="{{ art.get_absolute_url }}">{{ art.listing_excerpt }}</a>
+          </p>
+          {% endif %}
+        </div>
+      </article>
+    </li>
+    {% endfor %}
+  </ul>
+
+  {% if page_obj and page_obj.has_other_pages %}
+  <nav class="pagination" aria-label="{% trans 'Пагінація' %}">
+    {% if page_obj.has_previous %}
+    <a class="pagination__link" href="?page={{ page_obj.previous_page_number }}"
+       aria-label="{% trans 'Попередня сторінка' %}">‹</a>
+    {% endif %}
+
+    {% for num in page_obj.paginator.page_range %}
+      {% if page_obj.number == num %}
+      <span class="pagination__current" aria-current="page">{{ num }}</span>
+      {% elif num > page_obj.number|add:"-3" and num < page_obj.number|add:"3" %}
+      <a class="pagination__link" href="?page={{ num }}">{{ num }}</a>
+      {% elif num == 1 or num == page_obj.paginator.num_pages %}
+      <a class="pagination__link" href="?page={{ num }}">{{ num }}</a>
+      {% elif num == page_obj.number|add:"-4" or num == page_obj.number|add:"3" %}
+      <span class="pagination__ellipsis">…</span>
+      {% endif %}
+    {% endfor %}
+
+    {% if page_obj.has_next %}
+    <a class="pagination__link" href="?page={{ page_obj.next_page_number }}"
+       aria-label="{% trans 'Наступна сторінка' %}">›</a>
+    {% endif %}
+  </nav>
+  {% endif %}
+
+  {% else %}
+  <p class="empty-notice">{% trans "Новини ще не імпортовано. Запустіть python manage.py sync_spo_blog" %}</p>
+  {% endif %}
+</div>
+{% endblock %}

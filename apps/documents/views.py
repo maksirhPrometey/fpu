@@ -1,12 +1,15 @@
 """Documents views — category list and document listing."""
 from __future__ import annotations
 
-from django.http import HttpRequest, HttpResponse
+from django.http import Http404, HttpRequest, HttpResponse, HttpResponsePermanentRedirect
 from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_GET
 
 from apps.core.nav import NAV_SECTIONS
+
+from .legacy import STRATEGY_SLUGS, resolve_category_slug
 from .models import Document, DocumentCategory
 
 # Відомі nav-slugs для документів → назви (stub замість 404)
@@ -16,6 +19,21 @@ for _s in NAV_SECTIONS:
         if _c["url"].startswith("/documents/"):
             _slug = _c["url"].strip("/").rsplit("/", 1)[-1]
             _DOC_NAV_LABELS[_slug] = str(_c["label"])
+
+
+@require_GET
+def legacy_index(request: HttpRequest) -> HttpResponse:
+    """Joomla root: /dokumenti-fpu/ → /documents/."""
+    return HttpResponsePermanentRedirect(reverse("documents:document_index"))
+
+
+@require_GET
+def legacy_category(request: HttpRequest, legacy_slug: str) -> HttpResponse:
+    """Joomla subpaths: /dokumenti-fpu/<slug>/ → /documents/<canonical-slug>/."""
+    slug = resolve_category_slug(legacy_slug)
+    return HttpResponsePermanentRedirect(
+        reverse("documents:category_detail", kwargs={"slug": slug})
+    )
 
 
 @require_GET
@@ -36,22 +54,32 @@ def document_index(request: HttpRequest) -> HttpResponse:
     return render(request, "documents/document_index.html", context)
 
 
+def _render_strategy_page(request: HttpRequest) -> HttpResponse:
+    return render(request, "documents/strategiya.html", {
+        "breadcrumbs": [
+            {"title": _("Головна"), "url": "/"},
+            {"title": _("Документи ФПУ"), "url": "/documents/"},
+            {"title": _("Стратегія діяльності ФПУ на 2021–2026"), "url": request.path},
+        ],
+    })
+
+
 @require_GET
 def category_detail(request: HttpRequest, slug: str) -> HttpResponse:
     """Documents in a category."""
+    canonical_slug = resolve_category_slug(slug)
+    if canonical_slug != slug:
+        return HttpResponsePermanentRedirect(
+            reverse("documents:category_detail", kwargs={"slug": canonical_slug})
+        )
+
+    if canonical_slug in STRATEGY_SLUGS:
+        return _render_strategy_page(request)
+
     try:
-        category = DocumentCategory.objects.get(slug=slug)
+        category = DocumentCategory.objects.get(slug=canonical_slug)
     except DocumentCategory.DoesNotExist:
-        # Спеціальна сторінка для Стратегії
-        if slug == "strategiya-diyalnosti-fpu":
-            return render(request, "documents/strategiya.html", {
-                "breadcrumbs": [
-                    {"title": _("Головна"), "url": "/"},
-                    {"title": _("Документи ФПУ"), "url": "/documents/"},
-                    {"title": _("Стратегія діяльності ФПУ на 2021–2026"), "url": request.path},
-                ],
-            })
-        title = _DOC_NAV_LABELS.get(slug)
+        title = _DOC_NAV_LABELS.get(slug) or _DOC_NAV_LABELS.get(canonical_slug)
         if title:
             return render(request, "pages/stub.html", {
                 "page_title": title,
@@ -61,7 +89,8 @@ def category_detail(request: HttpRequest, slug: str) -> HttpResponse:
                     {"title": title, "url": request.path},
                 ],
             })
-        return get_object_or_404(DocumentCategory, slug=slug)  # raise 404
+        raise Http404 from None
+
     documents = Document.objects.filter(category=category, is_published=True).order_by("order", "-published_at")
     canonical = request.build_absolute_uri(category.get_absolute_url())
     context = {

@@ -1,7 +1,10 @@
 """Admin-only helper views for the news editor."""
 from __future__ import annotations
 
-import cloudinary.uploader
+import uuid
+from pathlib import Path
+
+from django.core.files.storage import default_storage
 from django.http import HttpRequest, JsonResponse
 from django.views.decorators.http import require_POST
 
@@ -11,12 +14,8 @@ _MAX_SIZE_BYTES = 10 * 1024 * 1024  # 10 MB
 
 @require_POST
 def upload_image(request: HttpRequest) -> JsonResponse:
-    """Upload an inline image to Cloudinary and return its secure URL.
-
-    This view is registered via ArticleAdmin.get_urls() and wrapped with
-    admin_site.admin_view(), which enforces login + staff checks automatically.
-    """
-    image = request.FILES.get("image")
+    """Upload an inline image to local media and return its URL."""
+    image = request.FILES.get("image") or request.FILES.get("file")
     if not image:
         return JsonResponse({"error": "Файл не передано"}, status=400)
 
@@ -30,12 +29,8 @@ def upload_image(request: HttpRequest) -> JsonResponse:
             {"error": "Файл завеликий — максимум 10 МБ"}, status=400
         )
 
-    result = cloudinary.uploader.upload(
-        image,
-        folder="fpsu/articles",
-        resource_type="image",
-        use_filename=True,
-        unique_filename=True,
-    )
+    ext = Path(image.name).suffix.lower() or ".jpg"
+    rel_path = f"uploads/articles/{uuid.uuid4().hex}{ext}"
+    saved = default_storage.save(rel_path, image)
 
-    return JsonResponse({"url": result["secure_url"]})
+    return JsonResponse({"url": default_storage.url(saved)})

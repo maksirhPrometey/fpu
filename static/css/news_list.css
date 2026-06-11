@@ -1,6 +1,117 @@
 /* Сторінка списку новин (category_list.html).
  * Базові стилі .breadcrumb перенесені в utilities.css (глобальні). */
 
+/* ── Joomla blog layout (napryamki menu feeds) ───────────────────────────── */
+.blog-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: var(--sp-20);
+}
+
+.blog-item {
+  background: var(--c-bg-card, #fff);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-lg);
+  padding: var(--sp-20) var(--sp-24);
+  box-shadow: var(--c-shadow-xs, 0 2px 8px -2px rgba(15, 44, 102, 0.10));
+  transition: box-shadow var(--transition-fast), border-color var(--transition-fast);
+}
+
+.blog-item:hover {
+  box-shadow: var(--c-shadow, 0 8px 24px -4px rgba(15, 44, 102, 0.14));
+  border-color: var(--c-border-strong, #c8d0e0);
+}
+
+.blog-item__header {
+  margin-bottom: var(--sp-16);
+  padding-bottom: var(--sp-12);
+  border-bottom: 1px solid var(--c-border);
+}
+
+.blog-item__title {
+  font-size: var(--fs-17, 1.0625rem);
+  font-weight: 700;
+  margin: 0;
+  line-height: 1.35;
+}
+
+.blog-item__title-link {
+  color: var(--c-primary);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.blog-item__title-link:hover,
+.blog-item__title-link:focus-visible {
+  color: var(--c-primary-700);
+}
+
+.blog-item__meta {
+  font-size: var(--fs-13);
+  color: var(--c-text-muted);
+  margin: var(--sp-8) 0 0;
+}
+
+.blog-item__date {
+  font-weight: 600;
+  color: var(--c-text);
+}
+
+.blog-item__row {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: var(--sp-20);
+  align-items: start;
+}
+
+.blog-item__row--no-image {
+  grid-template-columns: 1fr;
+}
+
+.blog-item__image-link {
+  display: block;
+  border-radius: var(--r-md);
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  background: linear-gradient(135deg, var(--c-primary) 0%, var(--c-primary-700) 100%);
+  transition: transform var(--transition-fast);
+}
+
+.blog-item:hover .blog-item__image-link {
+  transform: scale(1.02);
+}
+
+.blog-item__image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.blog-item__excerpt {
+  font-size: var(--fs-15);
+  line-height: 1.65;
+  margin: 0;
+  color: var(--c-text-muted);
+  display: -webkit-box;
+  -webkit-line-clamp: 5;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.blog-item__excerpt-link {
+  color: inherit;
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.blog-item__excerpt-link:hover,
+.blog-item__excerpt-link:focus-visible {
+  color: var(--c-primary);
+}
+
 /* ── Сітка новин ─────────────────────────────────────────────────────────── */
 .news-list {
   list-style: none;
@@ -104,6 +215,10 @@
 }
 
 /* ── Page header ─────────────────────────────────────────────────────────── */
+.category-single__body {
+  margin-top: var(--sp-8);
+}
+
 .page-header {
   margin-bottom: var(--sp-32);
   padding-bottom: var(--sp-16);
@@ -132,6 +247,15 @@
 
 /* ── Адаптив ─────────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
+  .blog-item {
+    padding: var(--sp-16);
+  }
+
+  .blog-item__row {
+    grid-template-columns: 140px 1fr;
+    gap: var(--sp-16);
+  }
+
   .news-card {
     grid-template-columns: 160px 1fr;
   }
@@ -146,6 +270,14 @@
 }
 
 @media (max-width: 560px) {
+  .blog-item__row {
+    grid-template-columns: 1fr;
+  }
+
+  .blog-item__image-link {
+    max-width: 280px;
+  }
+
   .news-card {
     grid-template-columns: 1fr;
   }

@@ -40,8 +40,6 @@ INSTALLED_APPS = [
 
     "rest_framework",
     "tinymce",
-    "cloudinary",
-    "cloudinary_storage",
 
     "apps.core",
     "apps.news",
@@ -50,6 +48,16 @@ INSTALLED_APPS = [
     "apps.gallery",
     "apps.documents",
 ]
+
+def _admin_navigation(request):
+    """Lazy wrapper so Unfold builds the sidebar at request time.
+
+    Deferring the import keeps settings free of app-registry access at load.
+    """
+    from apps.core.admin_nav import build_navigation
+
+    return build_navigation(request)
+
 
 UNFOLD = {
     "SITE_TITLE": "Адмінпанель ФПУ",
@@ -83,120 +91,7 @@ UNFOLD = {
     "SIDEBAR": {
         "show_search": True,
         "show_all_applications": False,
-        "navigation": [
-            {
-                "title": "Контент",
-                "separator": False,
-                "collapsible": False,
-                "items": [
-                    {
-                        "title": "Новини",
-                        "icon": "newspaper",
-                        "link": "/admin/news/article/",
-                    },
-                    {
-                        "title": "Категорії новин",
-                        "icon": "label",
-                        "link": "/admin/news/category/",
-                    },
-                    {
-                        "title": "Статичні сторінки",
-                        "icon": "article",
-                        "link": "/admin/pages/staticpage/",
-                    },
-                ],
-            },
-            {
-                "title": "Медіа",
-                "separator": True,
-                "collapsible": False,
-                "items": [
-                    {
-                        "title": "Альбоми",
-                        "icon": "photo_library",
-                        "link": "/admin/gallery/galleryalbum/",
-                    },
-                    {
-                        "title": "Фотографії",
-                        "icon": "image",
-                        "link": "/admin/gallery/galleryphoto/",
-                    },
-                ],
-            },
-            {
-                "title": "Документи",
-                "separator": True,
-                "collapsible": False,
-                "items": [
-                    {
-                        "title": "Документи",
-                        "icon": "description",
-                        "link": "/admin/documents/document/",
-                    },
-                    {
-                        "title": "Категорії документів",
-                        "icon": "folder",
-                        "link": "/admin/documents/documentcategory/",
-                    },
-                ],
-            },
-            {
-                "title": "Організація",
-                "separator": True,
-                "collapsible": False,
-                "items": [
-                    {
-                        "title": "Пріоритети",
-                        "icon": "star",
-                        "link": "/admin/core/priority/",
-                    },
-                    {
-                        "title": "Команда",
-                        "icon": "group",
-                        "link": "/admin/core/teammember/",
-                    },
-                    {
-                        "title": "Членські організації",
-                        "icon": "account_balance",
-                        "link": "/admin/core/memberorganization/",
-                    },
-                    {
-                        "title": "Налаштування сайту",
-                        "icon": "settings",
-                        "link": "/admin/core/sitesettings/",
-                    },
-                ],
-            },
-            {
-                "title": "Конструктор сторінок",
-                "separator": True,
-                "collapsible": False,
-                "items": [
-                    {
-                        "title": "Блоки сторінок",
-                        "icon": "widgets",
-                        "link": "/admin/core/pagesection/",
-                    },
-                ],
-            },
-            {
-                "title": "Доступ",
-                "separator": True,
-                "collapsible": True,
-                "items": [
-                    {
-                        "title": "Користувачі",
-                        "icon": "person",
-                        "link": "/admin/auth/user/",
-                    },
-                    {
-                        "title": "Групи",
-                        "icon": "groups",
-                        "link": "/admin/auth/group/",
-                    },
-                ],
-            },
-        ],
+        "navigation": _admin_navigation,
     },
 }
 
@@ -282,13 +177,9 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-CLOUDINARY_STORAGE = {
-    "CLOUD_NAME": env("CLOUDINARY_CLOUD_NAME", default=""),
-    "API_KEY": env("CLOUDINARY_API_KEY", default=""),
-    "API_SECRET": env("CLOUDINARY_API_SECRET", default=""),
-}
-DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
 MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
+DEFAULT_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
 
 # ── Cache ──────────────────────────────────────────────────────────────────────
 # REDIS_URL береться з env (Render надає при підключенні Redis-сервісу).
@@ -334,4 +225,62 @@ LOGGING = {
         },
     },
     "root": {"handlers": ["console"], "level": "INFO"},
+}
+
+# ── TinyMCE (admin WYSIWYG — Joomla-like) ─────────────────────────────────────
+TINYMCE_DEFAULT_CONFIG = {
+    "height": 520,
+    "width": "100%",
+    "skin": "oxide",
+    "content_css": "default",
+    "menubar": "file edit view insert format tools table help",
+    "plugins": (
+        "advlist autolink lists link image charmap preview anchor searchreplace "
+        "visualblocks code fullscreen insertdatetime media table help wordcount "
+        "directionality quickbars autosave"
+    ),
+    "toolbar": (
+        "undo redo | blocks fontfamily fontsize | "
+        "bold italic underline strikethrough subscript superscript | "
+        "forecolor backcolor removeformat | "
+        "alignleft aligncenter alignright alignjustify | "
+        "bullist numlist outdent indent | "
+        "link unlink anchor image media table hr | "
+        "code fullscreen"
+    ),
+    "block_formats": (
+        "Абзац=p; Заголовок 2=h2; Заголовок 3=h3; Заголовок 4=h4; "
+        "Цитата=blockquote; Код=pre"
+    ),
+    "font_family_formats": (
+        "Open Sans=Open Sans,sans-serif; Arial=arial,helvetica,sans-serif; "
+        "Times New Roman=times new roman,times,serif; Courier New=courier new,courier,monospace"
+    ),
+    "fontsize_formats": "8pt 10pt 12pt 14pt 16pt 18pt 24pt 36pt",
+    "image_advtab": True,
+    "image_caption": True,
+    "paste_data_images": True,
+    "relative_urls": False,
+    "convert_urls": False,
+    "entity_encoding": "raw",
+    "browser_spellcheck": True,
+    "promotion": False,
+    "branding": False,
+    "resize": True,
+    "quickbars_selection_toolbar": (
+        "bold italic underline | blocks | quicklink blockquote"
+    ),
+    "images_upload_handler": "fpsuTinyMceUploadHandler",
+    "setup": "fpsuTinyMceSetup",
+    "content_style": (
+        "body { font-family: 'Open Sans', Arial, sans-serif; "
+        "font-size: 14px; line-height: 1.6; color: #1a2238; "
+        "background: #fff; }"
+        "img { max-width: 100%; height: auto; }"
+    ),
+}
+
+TINYMCE_EXTRA_MEDIA = {
+    "js": ["admin/js/tinymce_body.js"],
+    "css": {"all": ["admin/css/tinymce_unfold.css"]},
 }

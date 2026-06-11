@@ -24,20 +24,6 @@ services:
           name: fpu-db
           property: connectionString
 
-      # ── Cloudinary ──────────────────────────────────────────────────────────
-      # Усі три окремих змінних потрібні для django-cloudinary-storage.
-      # CLOUDINARY_URL потрібна для прямого виклику cloudinary SDK
-      # (import_images, import_body_images management commands).
-      # Формат: cloudinary://<api_key>:<api_secret>@<cloud_name>
-      - key: CLOUDINARY_URL
-        sync: false
-      - key: CLOUDINARY_CLOUD_NAME
-        sync: false
-      - key: CLOUDINARY_API_KEY
-        sync: false
-      - key: CLOUDINARY_API_SECRET
-        sync: false
-
       # ── Email ────────────────────────────────────────────────────────────────
       - key: EMAIL_HOST
         value: "smtp.gmail.com"

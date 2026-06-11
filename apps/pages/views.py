@@ -9,7 +9,8 @@ from django.utils.translation import gettext_lazy as _
 from django.views.decorators.http import require_GET
 
 from apps.core.nav import NAV_SECTIONS
-from apps.news.models import Article
+from apps.news.models import Article, Category
+from apps.pages.menu_news import news_category_for_menu_path
 from .models import StaticPage
 
 # Стара Joomla транслітерувала «ї» як «ji»:
@@ -52,6 +53,24 @@ for _section in NAV_SECTIONS:
         _NAV_URL_LABELS[_curl] = str(_child["label"])
 
 
+def _redirect_to_category_list(path: str) -> HttpResponsePermanentRedirect | None:
+    """Prefer news category listing for menu URLs and direct category paths."""
+    path_clean = path.strip("/")
+    if path_clean.endswith(".html"):
+        path_clean = path_clean[:-5]
+
+    for category_path in (path_clean, news_category_for_menu_path(path_clean)):
+        if not category_path:
+            continue
+        try:
+            category = Category.objects.get(path=category_path, is_active=True)
+        except Category.DoesNotExist:
+            continue
+        if Article.objects.filter(category=category, is_published=True).exists():
+            return HttpResponsePermanentRedirect(f"/{path_clean}/")
+    return None
+
+
 def _build_breadcrumbs(url_path: str) -> list[dict]:
     """Return breadcrumb list for a StaticPage url_path."""
     clean = url_path.rstrip("/").removesuffix(".html")
@@ -90,12 +109,33 @@ def _render_static(request: HttpRequest, page: StaticPage) -> HttpResponse:
         "page_meta_keywords": page.meta_keywords,
         "canonical_url": canonical,
     }
-    return render(request, "pages/static_page.html", context)
+    template = (
+        "pages/fotoekspozytsiya.html"
+        if page.url_path.rstrip("/").removesuffix(".html") == "/fotoekspozytsiya"
+        else "pages/static_page.html"
+    )
+    if template == "pages/fotoekspozytsiya.html":
+        from apps.pages.fotoekspozytsiya import fotoeksp_entries_for_page, uses_structured_content
+        from apps.pages.models import FotoekspSettings
+
+        context["fotoeksp_settings"] = FotoekspSettings.load()
+        context["fotoeksp_structured"] = uses_structured_content(page)
+        if context["fotoeksp_structured"]:
+            grouped = fotoeksp_entries_for_page(page)
+            from apps.pages.models import FotoekspEntry
+
+            context["fotoeksp_teritorial"] = grouped[FotoekspEntry.SECTION_TERRITORIAL]
+            context["fotoeksp_galuz"] = grouped[FotoekspEntry.SECTION_GALUZ]
+    return render(request, template, context)
 
 
 @require_GET
 def static_page(request: HttpRequest, path: str) -> HttpResponse:
     """Static menu page accessed with .html suffix: /<path>.html"""
+    redirect = _redirect_to_category_list(path)
+    if redirect is not None:
+        return redirect
+
     url_path_html = f"/{path}.html"
     url_path_plain = f"/{path}"
     try:
@@ -115,6 +155,10 @@ def static_page(request: HttpRequest, path: str) -> HttpResponse:
 @require_GET
 def static_page_no_ext(request: HttpRequest, path: str) -> HttpResponse:
     """Static menu page without .html: /<path>"""
+    redirect = _redirect_to_category_list(path)
+    if redirect is not None:
+        return redirect
+
     url_path_html = f"/{path}.html"
     url_path_plain = f"/{path}"
     try:

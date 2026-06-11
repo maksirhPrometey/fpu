@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% load i18n static media_tags %}
+
+{% block title %}{{ page.effective_meta_title }} — {% trans "Федерація Профспілок України" %}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/fotoekspozytsiya.css' %}">
+{% endblock %}
+
+{% block page_banner %}
+<div class="page-banner fotoeksp-banner">
+  <div class="page-banner__inner fotoeksp-banner__inner">
+
+    {% if breadcrumbs %}
+    <nav class="page-banner__breadcrumb breadcrumb" aria-label="{% trans 'Навігація' %}">
+      <ol class="breadcrumb__list">
+        {% for crumb in breadcrumbs %}
+          <li class="breadcrumb__item">
+            {% if forloop.last %}
+              <span class="breadcrumb__current" aria-current="page">{{ crumb.title }}</span>
+            {% else %}
+              <a class="breadcrumb__link" href="{{ crumb.url }}">{{ crumb.title }}</a>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ol>
+    </nav>
+    {% endif %}
+
+    <p class="fotoeksp-banner__eyebrow">{{ fotoeksp_settings.eyebrow }}</p>
+    <h1 class="page-banner__title fotoeksp-banner__title">{{ fotoeksp_settings.banner_title }}</h1>
+    <p class="fotoeksp-banner__subtitle">{{ fotoeksp_settings.banner_subtitle }}</p>
+  </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="fotoeksp-layout">
+  <div class="fotoeksp-layout__main">
+    {% if fotoeksp_structured %}
+      <div class="static-page__body fotoeksp-page__body">
+        {% include "pages/partials/fotoeksp_structured.html" %}
+      </div>
+    {% elif page.body %}
+      <div class="static-page__body fotoeksp-page__body">
+        {{ page.body|fotoeksp_body }}
+      </div>
+    {% else %}
+      <p class="page-empty-notice">{% trans "Вміст сторінки оновлюється." %}</p>
+    {% endif %}
+  </div>
+
+  <aside class="fotoeksp-layout__aside" aria-label="{% trans 'Навігація по розділах' %}">
+    <div class="fotoeksp-aside-card">
+      <h2 class="fotoeksp-aside-card__title">{% trans "Розділи виставки" %}</h2>
+      <nav class="fotoeksp-aside-nav">
+        <a class="fotoeksp-aside-nav__link" href="#fotoeksp-teritorial">{% trans "Територіальні об'єднання" %}</a>
+        <a class="fotoeksp-aside-nav__link" href="#fotoeksp-galuz">{% trans "Галузеві профспілки" %}</a>
+      </nav>
+    </div>
+
+    {% if recent_articles %}
+    <div class="fotoeksp-aside-card">
+      <h2 class="fotoeksp-aside-card__title">{% trans "Останні новини" %}</h2>
+      <ul class="fotoeksp-aside-news" role="list">
+        {% for article in recent_articles %}
+          <li class="fotoeksp-aside-news__item">
+            <a class="fotoeksp-aside-news__link" href="{{ article.get_absolute_url }}">
+              {{ article.title }}
+            </a>
+            <time class="fotoeksp-aside-news__date" datetime="{{ article.published_at|date:'Y-m-d' }}">
+              {{ article.display_date }}
+            </time>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+  </aside>
+</div>
+{% endblock %}

@@ -1,8 +1,8 @@
 """Import gallery albums and photos from JoomGallery JSON dumps.
 
-JoomGallery stores images at: images/stories/{filename}
-So image_local values are written as "images/stories/{filename}",
-which maps to media/joomla_images/images/stories/{filename} on disk.
+JoomGallery stores images at: images/joomgallery/originals/<catpath>/<filename>
+So image_local values use catpath from gallery_cats.json,
+which maps to media/joomla_images/images/joomgallery/originals/… on disk.
 
 event_date is taken from the earliest photo date inside the album.
 
@@ -24,6 +24,7 @@ from django.db import transaction
 from django.utils.text import slugify
 
 from apps.gallery.models import GalleryAlbum, GalleryPhoto
+from apps.gallery.utils import JOOMGALLERY_ORIGINALS_PREFIX, photo_local_path
 
 
 def _parse_date(raw: str | None) -> date | None:
@@ -40,22 +41,6 @@ def _parse_date(raw: str | None) -> date | None:
 def _make_slug(title: str, joomla_id: int) -> str:
     base = slugify(title, allow_unicode=False) or f"album-{joomla_id}"
     return base[:280]
-
-
-def _photo_local_path(filename: str) -> str:
-    """
-    JoomGallery saves photos to <joomla_root>/images/stories/<filename>.
-    Our media root is media/joomla_images/, so the local path is:
-        images/stories/<filename>
-    which resolves to:
-        media/joomla_images/images/stories/<filename>
-    """
-    filename = filename.strip()
-    if filename.startswith("images/stories/"):
-        return filename
-    if filename.startswith("stories/"):
-        return f"images/{filename}"
-    return f"images/stories/{filename}"
 
 
 class Command(BaseCommand):
@@ -127,11 +112,13 @@ class Command(BaseCommand):
                 self.stdout.write(self.style.WARNING("Cleared."))
 
             album_map: dict[str, GalleryAlbum] = {}
+            catpath_map: dict[str, str] = {}
             created_albums = 0
             updated_albums = 0
 
             for cat in cats_data:
                 jid = int(cat["id"])
+                catpath_map[cat["id"]] = (cat.get("catpath") or "").strip()
                 title = (cat.get("name") or f"Альбом {jid}").strip()
                 alias = (cat.get("alias") or "").strip()
                 description = (cat.get("description") or "").strip()
@@ -186,7 +173,7 @@ class Command(BaseCommand):
                     skipped_photos += 1
                     continue
 
-                local_path = _photo_local_path(filename)
+                local_path = photo_local_path(filename, catpath_map.get(catid, ""))
 
                 GalleryPhoto.objects.update_or_create(
                     joomla_id=jid,
@@ -221,7 +208,9 @@ class Command(BaseCommand):
 
         self.stdout.write("")
         self.stdout.write(self.style.WARNING(
-            "NOTE: Gallery images must be at media/joomla_images/images/stories/ on disk.\n"
-            "      If images are missing, copy them from Joomla server:\n"
-            "      scp -r user@server:/path/to/joomla/images/stories/ media/joomla_images/images/stories/"
+            "NOTE: Gallery originals must be at "
+            f"media/joomla_images/{JOOMGALLERY_ORIGINALS_PREFIX}/<catpath>/ on disk.\n"
+            "      Sync from Joomla server:\n"
+            "      rsync …:/sites/www.fpsu.org.ua/images/joomgallery/originals/ "
+            "media/joomla_images/images/joomgallery/originals/"
         ))

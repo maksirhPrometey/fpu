@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 from django.contrib import admin
+from django.http import HttpResponseRedirect
+from django.urls import path, reverse
 from unfold.admin import ModelAdmin, TabularInline
 
 from .models import Document, DocumentCategory
@@ -22,6 +24,28 @@ class DocumentCategoryAdmin(ModelAdmin):
     prepopulated_fields = {"slug": ("title",)}
     inlines = [DocumentInline]
     list_per_page = 50
+
+    def get_urls(self):
+        custom = [
+            path(
+                "go/",
+                self.admin_site.admin_view(self.go_to_category),
+                name="documents_documentcategory_go",
+            ),
+        ]
+        return custom + super().get_urls()
+
+    def go_to_category(self, request):
+        """Resolve ?slug=<slug> to its change form (changelist if missing)."""
+        slug = (request.GET.get("slug") or "").strip().strip("/")
+        category = DocumentCategory.objects.filter(slug=slug).first()
+        if category:
+            return HttpResponseRedirect(
+                reverse("admin:documents_documentcategory_change", args=[category.pk])
+            )
+        return HttpResponseRedirect(
+            reverse("admin:documents_documentcategory_changelist")
+        )
 
     fieldsets = (
         (None, {

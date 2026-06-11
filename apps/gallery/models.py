@@ -1,10 +1,12 @@
 """Gallery models — albums and photos stored in Cloudinary."""
 from __future__ import annotations
 
-from cloudinary.models import CloudinaryField
 from django.db import models
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
+
+from apps.core.media_utils import file_field_url
+from apps.gallery.utils import resolved_media_url
 
 
 class GalleryAlbum(models.Model):
@@ -15,7 +17,7 @@ class GalleryAlbum(models.Model):
     slug = models.SlugField(_("Slug"), max_length=300, unique=True, allow_unicode=True)
     description = models.TextField(_("Опис"), blank=True)
     event_date = models.DateField(_("Дата заходу"), null=True, blank=True)
-    cover_image = CloudinaryField(_("Обкладинка"), blank=True, null=True)
+    cover_image = models.ImageField(_("Обкладинка"), upload_to="gallery/covers/", blank=True, null=True)
     cover_local = models.CharField(
         _("Локальна обкладинка"),
         max_length=500,
@@ -55,18 +57,11 @@ class GalleryAlbum(models.Model):
 
     @property
     def cover_url(self) -> str:
-        if self.cover_image:
-            try:
-                return self.cover_image.url
-            except Exception:
-                pass
         if self.cover_local:
-            from pathlib import Path
-            from django.conf import settings
-            local_path = Path(settings.MEDIA_ROOT) / "joomla_images" / self.cover_local
-            if local_path.exists():
-                return f"/media/joomla_images/{self.cover_local}"
-        return ""
+            url = resolved_media_url(self.cover_local)
+            if url:
+                return url
+        return file_field_url(self.cover_image)
 
     @property
     def photo_count(self) -> int:
@@ -83,7 +78,7 @@ class GalleryPhoto(models.Model):
         on_delete=models.CASCADE,
         related_name="photos",
     )
-    image = CloudinaryField(_("Фото"), blank=True, null=True)
+    image = models.ImageField(_("Фото"), upload_to="gallery/photos/", blank=True, null=True)
     image_local = models.CharField(
         _("Локальний шлях"),
         max_length=500,
@@ -107,15 +102,8 @@ class GalleryPhoto(models.Model):
 
     @property
     def image_url(self) -> str:
-        if self.image:
-            try:
-                return self.image.url
-            except Exception:
-                pass
         if self.image_local:
-            from pathlib import Path
-            from django.conf import settings
-            local_path = Path(settings.MEDIA_ROOT) / "joomla_images" / self.image_local
-            if local_path.exists():
-                return f"/media/joomla_images/{self.image_local}"
-        return ""
+            url = resolved_media_url(self.image_local)
+            if url:
+                return url
+        return file_field_url(self.image)

@@ -1,0 +1,45 @@
+/* TinyMCE in Unfold admin — always light, independent of admin dark mode */
+
+.fpsu-tinymce.tox-tinymce {
+  border-radius: 0.75rem;
+  border-color: rgb(209 213 219);
+  overflow: hidden;
+  background-color: #fff;
+}
+
+.fpsu-tinymce .tox-editor-header {
+  border-bottom: 1px solid rgb(229 231 235);
+  background-color: #fff;
+}
+
+.fpsu-tinymce .tox-toolbar,
+.fpsu-tinymce .tox-toolbar__primary,
+.fpsu-tinymce .tox-statusbar {
+  background-color: #fff;
+}
+
+.fpsu-tinymce .tox-edit-area {
+  min-height: 420px;
+  background-color: #fff;
+}
+
+.fpsu-tinymce .tox-edit-area__iframe {
+  background-color: #fff;
+}
+
+.field-body .grow.relative,
+.field-body .max-w-2xl {
+  max-width: none;
+  width: 100%;
+}
+
+.field-body textarea.tinymce {
+  min-height: 520px;
+  width: 100%;
+  max-width: 100%;
+}
+
+.field-body .tox-tinymce {
+  width: 100%;
+  max-width: 100%;
+}

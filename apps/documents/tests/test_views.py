@@ -56,3 +56,35 @@ def test_category_detail_shows_document(client, category, document):
 def test_category_detail_404(client):
     response = client.get(reverse("documents:category_detail", kwargs={"slug": "nonexistent"}))
     assert response.status_code == 404
+
+
+@pytest.mark.django_db
+def test_legacy_dokumenti_fpu_redirects_to_index(client):
+    response = client.get("/dokumenti-fpu/")
+    assert response.status_code == 301
+    assert response["Location"].endswith("/documents/")
+
+
+@pytest.mark.django_db
+def test_legacy_subpath_redirects_to_category(client, category):
+    response = client.get("/dokumenti-fpu/postanovi-radi-fpu/")
+    assert response.status_code == 301
+    assert response["Location"].endswith("/documents/postanovi-radi-fpu/")
+
+
+@pytest.mark.django_db
+def test_slug_alias_redirects(client, category):
+    response = client.get("/documents/materiali-vii-zizdu-fpu/")
+    assert response.status_code == 301
+    assert "materialy-vii-zyizdu-fpu" in response["Location"]
+
+
+@pytest.mark.django_db
+def test_vii_zjizd_alias_resolves(client):
+    DocumentCategory.objects.create(
+        title="Матеріали VII З'їзду",
+        slug="materialy-vii-zyizdu-fpu",
+        order=2,
+    )
+    response = client.get("/documents/materialy-vii-zyizdu-fpu/")
+    assert response.status_code == 200

@@ -6,7 +6,8 @@ from django.conf.urls.i18n import i18n_patterns
 from django.contrib import admin
 from django.contrib.sitemaps.views import sitemap
 from django.http import HttpResponse
-from django.urls import include, path
+from django.urls import include, path, re_path
+from django.views.static import serve as serve_media
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import RedirectView
 
@@ -65,6 +66,14 @@ urlpatterns += i18n_patterns(
     path("", include("apps.pages.urls")),
     prefix_default_language=False,
 )
+
+urlpatterns += [
+    re_path(
+        r"^media/(?P<path>.*)$",
+        serve_media,
+        {"document_root": settings.MEDIA_ROOT},
+    ),
+]
 
 if settings.DEBUG:
     from django.conf.urls.static import static

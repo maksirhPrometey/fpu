@@ -1,0 +1,204 @@
+{% load i18n static %}
+{# Hero mosaic — як на fpsu.org.ua: головна новина | слайдер + відео/анонси #}
+<section class="hero-mosaic" aria-label="{% trans 'Головні новини' %}">
+  <div class="hero-mosaic__grid">
+
+    {% if articles %}
+    {% with lead=articles.0 %}
+    <article class="hero-mosaic__lead">
+      <a class="hero-mosaic__card hero-mosaic__card--lead" href="{{ lead.get_absolute_url }}">
+        <span class="hero-mosaic__media">
+          {% if lead.image_url %}
+          <img src="{{ lead.image_url }}" alt="" width="960" height="540" decoding="async">
+          {% else %}
+          <span class="hero-mosaic__placeholder">
+            <span class="hero-mosaic__placeholder-date">{{ lead.display_date }}</span>
+          </span>
+          {% endif %}
+        </span>
+        <span class="hero-mosaic__caption">{{ lead.title }}</span>
+      </a>
+    </article>
+    {% endwith %}
+    {% else %}
+    <article class="hero-mosaic__lead">
+      <div class="hero-mosaic__card hero-mosaic__card--lead hero-mosaic__card--static">
+        <span class="hero-mosaic__media">
+          <img src="{% static 'img/hero/hero-photo-1.svg' %}" alt="" width="960" height="540" decoding="async">
+        </span>
+        <span class="hero-mosaic__caption">
+          {% trans "Федерація профспілок України — захист, єдність, сила працівників" %}
+        </span>
+      </div>
+    </article>
+    {% endif %}
+
+    <div class="hero-mosaic__side">
+
+      {% if articles|length > 1 %}
+      <div
+        class="hero-mosaic__slider"
+        data-hero-slider
+        aria-roledescription="carousel"
+        tabindex="0"
+      >
+        <span data-hero-slider-live class="sr-only" aria-live="polite" aria-atomic="true"></span>
+        <div class="hero-mosaic__slider-viewport">
+          <ul class="hero-mosaic__slider-track" data-hero-slider-track>
+            {% for article in articles|slice:"1:5" %}
+            <li
+              class="hero-mosaic__slider-slide"
+              data-hero-slider-slide
+              role="group"
+              aria-roledescription="slide"
+            >
+              <a class="hero-mosaic__card" href="{{ article.get_absolute_url }}">
+                <span class="hero-mosaic__media">
+                  {% if article.image_url %}
+                  <img src="{{ article.image_url }}" alt="" loading="lazy" decoding="async">
+                  {% else %}
+                  <span class="hero-mosaic__placeholder hero-mosaic__placeholder--compact">
+                    <span class="hero-mosaic__placeholder-date">{{ article.display_date }}</span>
+                  </span>
+                  {% endif %}
+                </span>
+                <span class="hero-mosaic__caption hero-mosaic__caption--sm">{{ article.title }}</span>
+              </a>
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+        <div class="hero-mosaic__slider-dots" role="group" aria-label="{% trans 'Слайди новин' %}">
+          {% for article in articles|slice:"1:5" %}
+          <button
+            type="button"
+            class="hero-mosaic__dot{% if forloop.first %} hero-mosaic__dot--active{% endif %}"
+            data-hero-slider-dot
+            aria-label="{% trans 'Новина' %} {{ forloop.counter }}"
+            aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
+          ></button>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      <div class="hero-mosaic__widgets">
+        <article class="hero-mosaic__widget hero-mosaic__widget--video">
+          <h2 class="hero-mosaic__widget-label">{% trans "Відео" %}</h2>
+          {% if hero_videos %}
+          {% with video=hero_videos.0 %}
+          <div class="hero-mosaic__widget-card" data-hero-video>
+            {% for v in hero_videos %}
+            <span
+              hidden
+              data-hero-video-item
+              data-youtube-id="{{ v.youtube_id }}"
+              data-youtube-watch="{{ v.watch_url }}"
+              data-title="{{ v.title|truncatewords:12 }}"
+              {% if v.article_url %}data-url="{{ v.article_url }}"{% endif %}
+            ></span>
+            {% endfor %}
+            <div class="hero-mosaic__video-stage">
+              <div class="hero-mosaic__card hero-mosaic__card--widget hero-mosaic__card--video">
+                <span class="hero-mosaic__media hero-mosaic__media--video">
+                  <iframe
+                    class="hero-mosaic__video-embed"
+                    data-hero-video-embed
+                    src="{{ video.embed_url }}"
+                    title="{{ video.title|truncatewords:12 }}"
+                    loading="lazy"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    referrerpolicy="strict-origin-when-cross-origin"
+                    allowfullscreen
+                  ></iframe>
+                </span>
+              </div>
+            </div>
+            <div class="hero-mosaic__video-meta">
+              {% if hero_videos|length > 1 %}
+              <div class="hero-mosaic__video-nav" role="group" aria-label="{% trans 'Відео' %}">
+                <button type="button" class="hero-mosaic__widget-btn" data-hero-video-prev aria-label="{% trans 'Попереднє' %}">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+                </button>
+                <button type="button" class="hero-mosaic__widget-btn" data-hero-video-next aria-label="{% trans 'Наступне' %}">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+                </button>
+              </div>
+              {% endif %}
+              <p class="hero-mosaic__video-title" data-hero-video-caption>
+                {% if video.article_url %}
+                <a class="hero-mosaic__video-link" href="{{ video.article_url }}">{{ video.title|truncatewords:10 }}</a>
+                {% else %}
+                {{ video.title|truncatewords:10 }}
+                {% endif %}
+              </p>
+              <a
+                class="hero-mosaic__video-youtube"
+                data-hero-video-youtube
+                href="{{ video.watch_url }}"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                YouTube
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="12" height="12">
+                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                  <polyline points="15 3 21 3 21 9"/>
+                  <line x1="10" y1="14" x2="21" y2="3"/>
+                </svg>
+              </a>
+            </div>
+          </div>
+          {% endwith %}
+          {% else %}
+          <a class="hero-mosaic__card hero-mosaic__card--widget" href="{% if site_settings.youtube_url %}{{ site_settings.youtube_url }}{% else %}/novini/{% endif %}">
+            <span class="hero-mosaic__media">
+              <img src="{% static 'img/hero/hero-photo-2.svg' %}" alt="" loading="lazy" decoding="async">
+            </span>
+            <span class="hero-mosaic__play" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+            </span>
+            <span class="hero-mosaic__caption hero-mosaic__caption--widget">{% trans "Відео ФПУ" %}</span>
+          </a>
+          {% endif %}
+        </article>
+
+        <article class="hero-mosaic__widget hero-mosaic__widget--announce">
+          <h2 class="hero-mosaic__widget-label">{% trans "Анонси" %}</h2>
+          {% if announce_section and announce_section.title %}
+          <a class="hero-mosaic__card hero-mosaic__card--widget" href="{{ announce_section.link_url|default:'/novini/' }}">
+            <span class="hero-mosaic__media">
+              {% if announce_section.image_url %}
+              <img src="{{ announce_section.image_url }}" alt="" loading="lazy" decoding="async">
+              {% else %}
+              <img src="{% static 'img/hero/hero-photo-3.svg' %}" alt="" loading="lazy" decoding="async">
+              {% endif %}
+            </span>
+            <span class="hero-mosaic__caption hero-mosaic__caption--widget">{{ announce_section.title }}</span>
+          </a>
+          {% elif articles|length > 6 %}
+          {% with ann=articles.6 %}
+          <a class="hero-mosaic__card hero-mosaic__card--widget" href="{{ ann.get_absolute_url }}">
+            <span class="hero-mosaic__media">
+              {% if ann.image_url %}
+              <img src="{{ ann.image_url }}" alt="" loading="lazy" decoding="async">
+              {% else %}
+              <span class="hero-mosaic__placeholder hero-mosaic__placeholder--compact"></span>
+              {% endif %}
+            </span>
+            <span class="hero-mosaic__caption hero-mosaic__caption--widget">{{ ann.title|truncatewords:14 }}</span>
+          </a>
+          {% endwith %}
+          {% else %}
+          <a class="hero-mosaic__card hero-mosaic__card--widget" href="/novini/">
+            <span class="hero-mosaic__media">
+              <img src="{% static 'img/hero/hero-photo-3.svg' %}" alt="" loading="lazy" decoding="async">
+            </span>
+            <span class="hero-mosaic__caption hero-mosaic__caption--widget">{% trans "Актуальні оголошення ФПУ" %}</span>
+          </a>
+          {% endif %}
+          <div class="hero-mosaic__announce-spacer" aria-hidden="true"></div>
+        </article>
+      </div>
+    </div>
+  </div>
+</section>

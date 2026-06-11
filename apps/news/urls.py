@@ -8,12 +8,22 @@ Joomla URL structures preserved:
 from __future__ import annotations
 
 from django.urls import re_path
+from django.views.generic import RedirectView
 
 from . import views
 
 app_name = "news"
 
 urlpatterns = [
+    # Legacy Joomla SEF aliases → current category paths
+    re_path(
+        r"^materialy/(?P<joomla_id>\d+)-(?P<slug>[\w-]+)\.html$",
+        RedirectView.as_view(url="/materiali/%(joomla_id)s-%(slug)s.html", permanent=True),
+    ),
+    re_path(
+        r"^281-fotovystavka-2024/(?P<joomla_id>\d+)-(?P<slug>[\w-]+)\.html$",
+        RedirectView.as_view(url="/fotovystavka-2024/%(joomla_id)s-%(slug)s.html", permanent=True),
+    ),
     # Article inside a category path (one or more path segments)
     # e.g. /materialy/29093-vidbuvsia-xiii-forum.html
     # e.g. /pro-fpu/istoriya/123-some-article.html

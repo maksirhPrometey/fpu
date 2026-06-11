@@ -33,7 +33,7 @@ def test_home_provides_context(client):
 def test_home_renders_critical_sections(client):
     response = client.get(reverse("core:home"))
     body = response.content.decode("utf-8")
-    assert 'class="hero"' in body
-    assert "news-feed" in body
+    assert "hero-mosaic" in body
+    assert "news-feed" in body or "home-news-grid" in body
     assert 'class="priorities-panel"' in body
     assert "team" in body

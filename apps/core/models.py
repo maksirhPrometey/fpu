@@ -1,10 +1,11 @@
 """Core models — site-wide configurable content."""
 from __future__ import annotations
 
-from cloudinary.models import CloudinaryField
 from django.db import models
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
+
+from apps.core.media_utils import file_field_url
 
 
 class SectionPage(models.TextChoices):
@@ -42,7 +43,7 @@ class PageSection(models.Model):
         blank=True,
         help_text=_("Відносний /про-фпу/ або повний https://…"),
     )
-    image = CloudinaryField(_("Фонове зображення"), blank=True, null=True)
+    image = models.ImageField(_("Фонове зображення"), upload_to="pagesections/", blank=True, null=True)
     order = models.PositiveSmallIntegerField(_("Порядок"), default=0)
     is_active = models.BooleanField(_("Активний"), default=True)
 
@@ -56,12 +57,7 @@ class PageSection(models.Model):
 
     @property
     def image_url(self) -> str:
-        if self.image:
-            try:
-                return self.image.url
-            except Exception:
-                return ""
-        return ""
+        return file_field_url(self.image)
 
 
 class SiteSettings(models.Model):
@@ -147,7 +143,7 @@ class TeamMember(models.Model):
     full_name = models.CharField(_("Повне імʼя"), max_length=120)
     role = models.CharField(_("Посада"), max_length=160)
     bio = models.CharField(_("Короткий опис"), max_length=300, blank=True)
-    photo = CloudinaryField(_("Фото"), blank=True, null=True)
+    photo = models.ImageField(_("Фото"), upload_to="team/", blank=True, null=True)
     order = models.PositiveSmallIntegerField(_("Порядок"), default=0)
     is_active = models.BooleanField(_("Активний"), default=True)
 
@@ -161,12 +157,7 @@ class TeamMember(models.Model):
 
     @property
     def photo_url(self) -> str:
-        if self.photo:
-            try:
-                return self.photo.url
-            except Exception:
-                return ""
-        return ""
+        return file_field_url(self.photo)
 
     @property
     def initials(self) -> str:
@@ -187,7 +178,7 @@ class MemberOrganization(models.Model):
     slug = models.SlugField(_("Slug"), max_length=300, unique=True, allow_unicode=True, blank=True)
     region = models.CharField(_("Регіон"), max_length=100, blank=True)
     website_url = models.URLField(_("Сайт"), blank=True)
-    logo = CloudinaryField(_("Логотип"), blank=True, null=True)
+    logo = models.ImageField(_("Логотип"), upload_to="member_orgs/", blank=True, null=True)
     description = models.TextField(_("Опис"), blank=True)
     order = models.PositiveSmallIntegerField(_("Порядок"), default=0)
     is_active = models.BooleanField(_("Активна"), default=True)
@@ -211,6 +202,28 @@ class MemberOrganization(models.Model):
                 i += 1
             self.slug = slug
         super().save(*args, **kwargs)
+
+
+class SpoHomeCache(models.Model):
+    """Cached homepage blocks synced from spo.fpsu.org.ua."""
+
+    news = models.JSONField(_("Новини"), default=list, blank=True)
+    videos = models.JSONField(_("Відео"), default=list, blank=True)
+    gallery = models.JSONField(_("Фотогалерея"), default=list, blank=True)
+    partners = models.JSONField(_("Партнери"), default=list, blank=True)
+    synced_at = models.DateTimeField(_("Синхронізовано"), null=True, blank=True)
+
+    class Meta:
+        verbose_name = _("Кеш головної СПО")
+        verbose_name_plural = _("Кеш головної СПО")
+
+    def __str__(self) -> str:
+        return "SPO homepage cache"
+
+    @classmethod
+    def load(cls) -> SpoHomeCache:
+        obj, _ = cls.objects.get_or_create(pk=1)
+        return obj
 
 
 class JoinRequest(models.Model):
@@ -275,7 +288,7 @@ class MemOrgPage(models.Model):
     email       = models.EmailField(_("Email"), blank=True)
     founded_year = models.PositiveSmallIntegerField(_("Рік заснування"), null=True, blank=True)
     website_url  = models.URLField(_("Власний сайт організації"), blank=True)
-    logo         = CloudinaryField(_("Логотип"), blank=True, null=True)
+    logo         = models.ImageField(_("Логотип"), upload_to="mem_org_pages/", blank=True, null=True)
     source_url   = models.URLField(_("Джерело fpsu.org.ua"), max_length=800, blank=True,
                                    help_text=_("Оригінальна URL-адреса на старому сайті"))
     meta_description = models.CharField(_("Meta description"), max_length=300, blank=True)

@@ -64,6 +64,9 @@ class Command(BaseCommand):
         self._run("seed_team")
         self._run("seed_member_organizations")
         self._run("seed_document_categories")
+        self._run("seed_documents")
+        self._run("sync_spo_blog")
+        self._run("sync_spo_home")
         self._run("seed_section_pages")
 
         # Gallery — only if JSON data files are bundled in the repo

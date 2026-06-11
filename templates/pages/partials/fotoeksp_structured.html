@@ -1,0 +1,82 @@
+{% load i18n %}
+{% if fotoeksp_settings.hero_image_url %}
+<p class="fotoeksp-intro__image">
+  <img src="{{ fotoeksp_settings.hero_image_url }}" alt="" width="800" height="539" loading="lazy">
+</p>
+{% endif %}
+
+{% if fotoeksp_settings.notice_text %}
+<p class="fotoeksp-intro__notice">{{ fotoeksp_settings.notice_text }}</p>
+{% endif %}
+
+<p class="fotoeksp-section-heading" id="fotoeksp-teritorial">
+  {% trans "ТЕРИТОРІАЛЬНІ ОБ'ЄДНАННЯ ПРОФСПІЛОК" %}
+</p>
+{% if fotoeksp_settings.teritorial_date_note %}
+<p class="fotoeksp-section-date">{{ fotoeksp_settings.teritorial_date_note }}</p>
+{% endif %}
+
+<div class="fotoeksp-table-wrap">
+  <table class="fotoeksp-table">
+    <thead>
+      <tr>
+        <th scope="col">{% trans "№ п/п" %}</th>
+        <th scope="col">{% trans "Назва територіального об'єднання профспілкової організації" %}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for entry in fotoeksp_teritorial %}
+        <tr>
+          <td>{{ entry.order }}.</td>
+          <td>
+            {% if entry.has_link %}
+              <a href="{{ entry.url }}"><span>{{ entry.title }}</span></a>
+            {% else %}
+              <span>{{ entry.title }}</span>
+            {% endif %}
+          </td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="2">{% trans "Список порожній." %}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<p class="fotoeksp-section-heading" id="fotoeksp-galuz">
+  {% trans "ВСЕУКРАЇНСЬКІ ГАЛУЗЕВІ ПРОФСПІЛКИ" %}
+</p>
+{% if fotoeksp_settings.galuz_date_note %}
+<p class="fotoeksp-section-date">{{ fotoeksp_settings.galuz_date_note }}</p>
+{% endif %}
+
+<div class="fotoeksp-table-wrap">
+  <table class="fotoeksp-table">
+    <thead>
+      <tr>
+        <th scope="col">{% trans "№ п/п" %}</th>
+        <th scope="col">{% trans "Назва галузевої профспілки" %}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for entry in fotoeksp_galuz %}
+        <tr>
+          <td>{{ entry.order }}.</td>
+          <td>
+            {% if entry.has_link %}
+              <a href="{{ entry.url }}"><span>{{ entry.title }}</span></a>
+            {% else %}
+              <span>{{ entry.title }}</span>
+            {% endif %}
+          </td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="2">{% trans "Список порожній." %}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

@@ -17,21 +17,21 @@
   max-width: var(--container-max);
   margin-inline: auto;
   padding: var(--sp-32) var(--sp-24) var(--sp-64);
-  padding-right: calc(var(--panel-w) + var(--panel-side) * 2 + var(--sp-24));
+  padding-right: calc(var(--panel-w) + var(--panel-side) * 2 + var(--sp-48));
+  min-width: 0;
 }
 
 /*
   Фіксована панель — завжди видима при скролі.
-  top + bottom замість height, щоб JS міг скорегувати нижній край над
-  футером. Сам перехід — CSS transition, JS лише пише одне значення.
+  bottom оновлюється JS (rAF) без CSS transition, тому
+  позиція не відстає від швидкого скролу.
 */
 .priorities-panel {
   position: fixed;
   top: calc(var(--header-h) + var(--sp-32));
   bottom: var(--sp-12);
-  right: max(
-    var(--panel-side),
-    calc((100vw - var(--container-max)) / 2 + var(--panel-side))
+  right: calc(
+    (100vw - min(100vw, var(--container-max))) / 2 + var(--panel-side)
   );
   width: var(--panel-w);
   overflow-y: auto;
@@ -40,10 +40,7 @@
   -webkit-overflow-scrolling: touch;
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
-
-  /* CSS-анімація підйому над футером: JS змінює bottom, CSS плавно анімує */
-  transition: bottom 120ms ease-out;
-  will-change: bottom;
+  transition: opacity 120ms linear;
 }
 
 /* ── 1180px ─────────────────────────────────────────────────────────────────── */
@@ -77,13 +74,12 @@
 .hero-stack {
   display: flex;
   flex-direction: column;
-  gap: var(--sp-20);
+  gap: var(--sp-16);
   min-width: 0;
-  min-height: calc(100dvh - var(--header-h) - var(--sp-32) - var(--sp-64));
 }
 
-.hero-stack > .hero {
-  flex: 1 1 auto;
+.hero-stack > .hero-mosaic {
+  flex: 0 0 auto;
 }
 
 /* ── Адаптив home-grid ─────────────────────────────────────────────────────── */

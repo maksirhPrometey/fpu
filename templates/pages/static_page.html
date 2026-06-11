@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n static %}
+{% load i18n static media_tags %}
 
 {% block title %}{{ page.effective_meta_title }} — {% trans "Федерація Профспілок України" %}{% endblock %}
 
@@ -39,7 +39,7 @@
     {% if page.body %}
       <div class="article__body static-page__body">
         {# body очищається bleach при імпорті (tools/clean_html.py) — safe #}
-        {{ page.body|safe }}
+        {{ page.body|local_media_body }}
       </div>
     {% else %}
       <p class="page-empty-notice">{% trans "Вміст сторінки оновлюється." %}</p>

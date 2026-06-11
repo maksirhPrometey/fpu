@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 {% load i18n static %}
 
+{% block body_class %}page page--spo{% endblock %}
+
 {% block title %}{% trans "СПО об'єднань профспілок" %} — {% trans "Федерація Профспілок України" %}{% endblock %}
 
 {% block extra_css %}
@@ -29,152 +31,135 @@
 {% endblock %}
 
 {% block content %}
-<div class="content-wrap">
+<div class="content-wrap spo-page">
 
-  {# ── Hero statement ──────────────────────────────────────────────────── #}
-  <div class="spo-hero">
-    <p class="spo-hero__title">{% trans "Спільний представницький орган репрезентативних всеукраїнських об'єднань профспілок на національному рівні" %}</p>
-    <p class="spo-hero__text">
-      {% blocktrans %}
-      є стороною соціального діалогу на національному рівні, який представляє інтереси понад
-      <strong>5,2 мільйонів працівників</strong> всіх секторів економіки та сфер суспільного
-      життя у заходах на національному та міжнародному рівнях.
-      {% endblocktrans %}
-    </p>
-    <ul class="spo-hero__points">
-      <li class="spo-hero__point">
-        {% trans "Є учасником колективних переговорів з укладення Генеральної угоди, реалізації та контролю за її виконанням." %}
-      </li>
-      <li class="spo-hero__point">
-        {% trans "Представляє і захищає права та інтереси працівників під час розробки нормативно-правових актів у сфері трудових та соціально-економічних відносин." %}
-      </li>
-      <li class="spo-hero__point">
-        {% trans "Здійснює координацію діяльності всеукраїнських об'єднань профспілок — учасників СПО." %}
-      </li>
-    </ul>
-  </div>
-
-  {# ── Склад СПО ───────────────────────────────────────────────────────── #}
-  <section class="spo-section" aria-labelledby="spo-members-title">
-    <h2 id="spo-members-title" class="spo-section__title">{% trans "До складу СПО об'єднань профспілок входять" %}</h2>
-    <ul class="spo-members">
-      <li class="spo-member">
-        <span class="spo-member__num">1</span>
-        <p class="spo-member__name">{% trans "Федерація профспілок України" %}</p>
-      </li>
-      <li class="spo-member">
-        <span class="spo-member__num">2</span>
-        <p class="spo-member__name">{% trans "Федерація профспілок транспортників України" %}</p>
-      </li>
-      <li class="spo-member">
-        <span class="spo-member__num">3</span>
-        <p class="spo-member__name">{% trans "Конфедерація Вільних профспілок України" %}</p>
-      </li>
-      <li class="spo-member">
-        <span class="spo-member__num">4</span>
-        <p class="spo-member__name">{% trans "Об'єднання всеукраїнських профспілок і профоб'єднань «Єдність»" %}</p>
-      </li>
-      <li class="spo-member">
-        <span class="spo-member__num">5</span>
-        <p class="spo-member__name">{% trans "Об'єднання всеукраїнських автономних профспілок" %}</p>
-      </li>
-    </ul>
-  </section>
-
-  {# ── Новини СПО ──────────────────────────────────────────────────────── #}
-  {% if spo_articles %}
-  <section class="spo-section" aria-labelledby="spo-news-title">
-    <h2 id="spo-news-title" class="spo-section__title">{% trans "Новини" %}</h2>
-    <ul class="spo-news-list">
-      {% for article in spo_articles %}
-      <li class="spo-news-item">
-        <time class="spo-news-item__date" datetime="{{ article.published_at|date:'Y-m-d' }}">
-          {{ article.display_date }}
-        </time>
-        <h3 class="spo-news-item__title">
-          <a href="{{ article.get_absolute_url }}">{{ article.title }}</a>
-        </h3>
-      </li>
-      {% endfor %}
-    </ul>
-    <div class="spo-news-all">
-      <a class="btn btn--outline" href="/novini/">
-        {% trans "Читати всі новини" %}
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
-             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="16" height="16">
-          <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
-        </svg>
-      </a>
+  <section class="spo-top" aria-label="{% trans 'Про СПО' %}">
+    <div class="spo-intro">
+      <h2 class="spo-intro__lead">{{ spo_hero_lead }}</h2>
+      <ul class="spo-intro__points">
+        {% for point in spo_hero_points %}
+        <li>{{ point }}</li>
+        {% endfor %}
+      </ul>
     </div>
-  </section>
-  {% endif %}
 
-  {# ── Документи ───────────────────────────────────────────────────────── #}
-  {% if spo_docs %}
-  <section class="spo-section" aria-labelledby="spo-docs-title">
-    <h2 id="spo-docs-title" class="spo-section__title">{% trans "Документи" %}</h2>
-    <ul class="spo-news-list">
-      {% for doc in spo_docs %}
-      <li class="spo-news-item">
-        <time class="spo-news-item__date" datetime="{{ doc.published_at|date:'Y-m-d' }}">
-          {{ doc.published_at|date:"d.m.Y" }}
-        </time>
-        <h3 class="spo-news-item__title">
-          <a href="{{ doc.download_url }}" target="_blank" rel="noopener">{{ doc.title }}</a>
-        </h3>
-      </li>
-      {% endfor %}
-    </ul>
-  </section>
-  {% endif %}
+    <div class="spo-top__row">
+      <section class="spo-block spo-block--members" aria-labelledby="spo-members-title">
+        <header class="spo-block__header">
+          <h2 id="spo-members-title" class="spo-block__title">
+            {% trans "До складу СПО об'єднань профспілок входять:" %}
+          </h2>
+        </header>
+        <ul class="spo-members">
+          {% for member in spo_members %}
+          <li class="spo-members__item">
+            <a class="spo-members__link"
+               href="{{ member.url }}"
+               {% if member.external %}target="_blank" rel="noopener noreferrer"{% endif %}>
+              {{ member.title }}
+            </a>
+          </li>
+          {% endfor %}
+        </ul>
+      </section>
 
-  {# ── Керівництво ─────────────────────────────────────────────────────── #}
-  <section class="spo-section" aria-labelledby="spo-team-title">
-    <h2 id="spo-team-title" class="spo-section__title">{% trans "Наша команда" %}</h2>
-    <div class="spo-team">
-      {% for person in spo_team %}
-      <div class="spo-team-card">
-        <div class="spo-team-card__avatar">
-          {% if person.photo_url %}
-          <img src="{{ person.photo_url }}" alt="{{ person.full_name }}" loading="lazy">
-          {% else %}
-          {{ person.initials }}
+      {% if spo_videos %}
+      <aside class="spo-videos" aria-label="{% trans 'Відео' %}">
+        {% for video in spo_videos %}
+        <div class="spo-videos__item">
+          <div class="spo-videos__frame-wrap">
+            <iframe class="spo-videos__frame"
+                    src="{{ video.embed_url }}"
+                    title="{{ video.title }}"
+                    loading="lazy"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    referrerpolicy="strict-origin-when-cross-origin"
+                    allowfullscreen></iframe>
+          </div>
+          {% if video.watch_url %}
+          <a class="spo-videos__watch" href="{{ video.watch_url }}" target="_blank" rel="noopener noreferrer">
+            {% trans "Переглянути відео на YouTube" %}
+          </a>
           {% endif %}
         </div>
-        <p class="spo-team-card__role">{{ person.role }}</p>
-        <p class="spo-team-card__name">{{ person.full_name }}</p>
-      </div>
-      {% endfor %}
+        {% endfor %}
+      </aside>
+      {% endif %}
     </div>
   </section>
 
-  {# ── Посилання ───────────────────────────────────────────────────────── #}
-  <section class="spo-section" aria-labelledby="spo-links-title">
-    <h2 id="spo-links-title" class="spo-section__title">{% trans "Корисні посилання" %}</h2>
-    <div class="spo-members">
-      <div class="spo-member">
-        <span class="spo-member__num" aria-hidden="true">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
-            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
-          </svg>
-        </span>
-        <a class="spo-member__name" href="https://spo.fpsu.org.ua/" target="_blank" rel="noopener">
-          {% trans "Офіційний сайт СПО об'єднань профспілок" %}
-        </a>
-      </div>
-      <div class="spo-member">
-        <span class="spo-member__num" aria-hidden="true">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-            <polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/>
-            <line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
-          </svg>
-        </span>
-        <a class="spo-member__name" href="/documents/">{% trans "Документи ФПУ" %}</a>
-      </div>
-    </div>
+  {% if spo_news %}
+  <section class="spo-block" aria-labelledby="spo-news-title">
+    <header class="spo-block__header">
+      <h2 id="spo-news-title" class="spo-block__title">{% trans "Новини" %}</h2>
+    </header>
+    <ul class="spo-news">
+      {% for item in spo_news %}
+      <li class="spo-news__item">
+        <article class="spo-news__card">
+          {% if item.image_url %}
+          <div class="spo-news__thumb">
+            <a href="{{ item.url }}" tabindex="-1" aria-hidden="true">
+              <img class="spo-news__img" src="{{ item.image_url }}" alt="" loading="lazy" width="290" height="190">
+            </a>
+          </div>
+          {% endif %}
+          <div class="spo-news__body">
+            {% if item.date %}
+            <time class="spo-news__date" datetime="{{ item.date }}">{{ item.date }}</time>
+            {% endif %}
+            <h3 class="spo-news__title">
+              <a href="{{ item.url }}">{{ item.title }}</a>
+            </h3>
+            {% if item.excerpt %}
+            <p class="spo-news__excerpt">{{ item.excerpt }}</p>
+            {% endif %}
+          </div>
+        </article>
+      </li>
+      {% endfor %}
+    </ul>
+    <p class="spo-news__more">
+      <a class="spo-news__all" href="{{ spo_news_all_url }}">
+        {% trans "Читати всі новини" %}
+      </a>
+    </p>
   </section>
+  {% endif %}
+
+  {% if spo_gallery %}
+  <section class="spo-block" aria-labelledby="spo-gallery-title">
+    <header class="spo-block__header">
+      <h2 id="spo-gallery-title" class="spo-block__title">{% trans "Фотогалерея" %}</h2>
+    </header>
+    <ul class="spo-gallery">
+      {% for photo in spo_gallery %}
+      <li class="spo-gallery__item">
+        <a class="spo-gallery__link" href="{{ photo.link }}" target="_blank" rel="noopener noreferrer">
+          <img class="spo-gallery__img" src="{{ photo.image_url }}" alt="" loading="lazy" width="240" height="160">
+        </a>
+      </li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% endif %}
+
+  {% if spo_partners %}
+  <section class="spo-block spo-block--partners" aria-labelledby="spo-partners-title">
+    <header class="spo-block__header">
+      <h2 id="spo-partners-title" class="spo-block__title">
+        {% trans "Суб'єкти СПО об'єднань профспілок і Партнери" %}
+      </h2>
+    </header>
+    <ul class="spo-partners">
+      {% for partner in spo_partners %}
+      <li class="spo-partners__item">
+        <img class="spo-partners__logo" src="{{ partner.image_url }}" alt="{{ partner.alt }}" loading="lazy" width="233" height="150">
+      </li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% endif %}
 
 </div>
 {% endblock %}

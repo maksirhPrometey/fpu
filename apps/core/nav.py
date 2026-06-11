@@ -32,7 +32,6 @@ NAV_SECTIONS: list[dict] = [
             {"label": _("Соціальне страхування і пенсійне забезпечення"),           "url": "/napryamki-diyalnosti/sotsialne-strakhuvannya-i-pensijne-zabezpechennya/"},
             {"label": _("Соціальний діалог та колективно-договірне регулювання"),   "url": "/napryamki-diyalnosti/sotsialnij-dialog-ta-kolektivno-dogovirne-regulyuvannya/"},
             {"label": _("Організаційна робота"),                                    "url": "/napryamki-diyalnosti/organizatsijna-robota/"},
-            {"label": _("Стати членом профспілки"),                                "url": "/staty-chlenom-profspilky/"},
             {"label": _("Молодіжна політика"),                                      "url": "/napryamki-diyalnosti/molodizhna-politika/"},
             {"label": _("Інформаційна робота"),                                     "url": "/napryamki-diyalnosti/informatsijna-robota/"},
             {"label": _("Міжнародна робота"),                                       "url": "/napryamki-diyalnosti/mizhnarodna-robota/"},
@@ -43,8 +42,8 @@ NAV_SECTIONS: list[dict] = [
         "label": _("Документи ФПУ"),
         "url": "/documents/",
         "children": [
-            {"label": _("Матеріали VII З'їзду ФПУ"),                 "url": "/documents/materiali-vii-zizdu-fpu/"},
-            {"label": _("Матеріали VIII З'їзду ФПУ"),                "url": "/documents/materiali-viii-zizdu-fpu/"},
+            {"label": _("Матеріали VII З'їзду ФПУ"),                 "url": "/documents/materialy-vii-zyizdu-fpu/"},
+            {"label": _("Матеріали VIII З'їзду ФПУ"),                "url": "/documents/materialy-viii-zyizdu-fpu/"},
             {"label": _("Постанови Ради ФПУ"),                       "url": "/documents/postanovi-radi-fpu/"},
             {"label": _("Постанови Президії ФПУ"),                   "url": "/documents/postanovi-prezidiji-fpu/"},
             {"label": _("Статут ФПУ"),                               "url": "/documents/statut-fpu/"},
@@ -69,7 +68,7 @@ NAV_SECTIONS: list[dict] = [
     },
     {
         "label": _("Фотовиставка"),
-        "url": "/gallery/",
+        "url": "/fotoekspozytsiya/",
         "children": [],
     },
     {

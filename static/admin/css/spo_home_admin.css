@@ -1,0 +1,106 @@
+/* SPO homepage admin — structured blocks instead of JSON */
+
+.spo-admin-blocks {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.spo-admin-block {
+  border: 1px solid #334155;
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  background: #0f172a;
+}
+
+.spo-admin-block__head {
+  margin-bottom: 1rem;
+}
+
+.spo-admin-block__title {
+  margin: 0 0 0.35rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #f1f5f9;
+}
+
+.spo-admin-block__hint {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #94a3b8;
+  line-height: 1.45;
+}
+
+.spo-admin-block__rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.spo-admin-row {
+  padding: 0.85rem 1rem;
+  border-radius: 8px;
+  background: #1e293b;
+  border: 1px solid #475569;
+}
+
+.spo-admin-row__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem 1rem;
+}
+
+.spo-admin-row__grid--video {
+  grid-template-columns: 1.2fr 1fr;
+}
+
+.spo-admin-field__label {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #cbd5e1;
+}
+
+.spo-admin-field input[type="url"],
+.spo-admin-field input[type="text"] {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.5rem 0.65rem;
+  border-radius: 6px;
+  border: 1px solid #475569;
+  background: #0f172a;
+  color: #f8fafc;
+  font-size: 0.9rem;
+}
+
+.spo-admin-field input:focus {
+  outline: 2px solid #0284c7;
+  outline-offset: 1px;
+  border-color: #0284c7;
+}
+
+.spo-admin-delete {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.65rem;
+  font-size: 0.82rem;
+  color: #f87171;
+  cursor: pointer;
+}
+
+.spo-admin-field__error,
+.spo-admin-row__error {
+  margin: 0.25rem 0 0;
+  font-size: 0.78rem;
+  color: #f87171;
+}
+
+@media (max-width: 768px) {
+  .spo-admin-row__grid,
+  .spo-admin-row__grid--video {
+    grid-template-columns: 1fr;
+  }
+}

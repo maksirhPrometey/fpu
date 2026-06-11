@@ -54,14 +54,14 @@
   <link rel="stylesheet" href="{% static 'css/home_extras.css' %}">
   {% block extra_css %}{% endblock %}
 </head>
-<body class="page">
-  <div class="dev-banner" role="alert">
-    ⚠ ТЕСТОВИЙ САЙТ — ЗНАХОДИТЬСЯ В РОЗРОБЦІ. Інформація може бути неактуальною.
-  </div>
-
+<body class="{% block body_class %}page{% endblock %}">
   <a class="skip-link" href="#main">{% trans "Перейти до основного вмісту" %}</a>
 
   {% include 'partials/header.html' %}
+
+  <p class="dev-banner" role="alert">
+    ТЕСТОВИЙ САЙТ — ЗНАХОДИТЬСЯ В РОЗРОБЦІ. Інформація може бути неактуальною.
+  </p>
 
   {% block page_banner %}{% endblock %}
 

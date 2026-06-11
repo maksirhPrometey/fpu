@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n static %}
+{% load i18n static media_tags %}
 
 {% block title %}{{ page_meta_title }} — {% trans "Федерація Профспілок України" %}{% endblock %}
 
@@ -65,9 +65,9 @@
     <p class="article__summary">{{ article.summary }}</p>
     {% endif %}
 
-    <div class="article__body">
+    <div class="article__body static-page__body">
       {# body очищається bleach при імпорті (tools/clean_html.py) — safe #}
-      {{ article.body|safe }}
+      {{ article.body|local_media_body }}
     </div>
 
     {# ── Кнопки "Поділитися" ─────────────────────────────────────────── #}

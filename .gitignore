@@ -25,3 +25,15 @@ fpu_data.tar.gz
 # Generated tool artifacts — regeneratable, not needed in git
 tools/image_paths.txt
 tools/.upload_images_cloudinary.lock
+
+# Large data files generated locally — never commit
+tools/fpsu_full_dump.sql
+tools/fpsu_seo_dump.sql
+tools/cats.tsv
+tools/articles.tsv
+tools/menu.tsv
+tools/content_bodies.json
+tools/verify_report.json
+
+# Docker build context (local dev overrides)
+.env.docker

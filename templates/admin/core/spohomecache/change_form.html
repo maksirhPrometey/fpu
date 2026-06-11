@@ -1,0 +1,102 @@
+{% extends "admin/change_form.html" %}
+{% load i18n %}
+
+{% block after_field_sets %}
+<div class="spo-admin-blocks">
+
+  <section class="spo-admin-block">
+    <header class="spo-admin-block__head">
+      <h2 class="spo-admin-block__title">{% trans "Відео" %}</h2>
+      <p class="spo-admin-block__hint">{% trans "Вставте посилання YouTube — відео з’явиться у блоці праворуч на сторінці СПО." %}</p>
+    </header>
+    {{ video_formset.management_form }}
+    <div class="spo-admin-block__rows" data-spo-formset="videos">
+      {% for form in video_formset %}
+      <div class="spo-admin-row">
+        {% if form.non_field_errors %}<p class="spo-admin-row__error">{{ form.non_field_errors }}</p>{% endif %}
+        <div class="spo-admin-row__grid spo-admin-row__grid--video">
+          <div class="spo-admin-field">
+            <label class="spo-admin-field__label" for="{{ form.title.id_for_label }}">{{ form.title.label }}</label>
+            {{ form.title }}
+            {% if form.title.errors %}<p class="spo-admin-field__error">{{ form.title.errors }}</p>{% endif %}
+          </div>
+          <div class="spo-admin-field">
+            <label class="spo-admin-field__label" for="{{ form.youtube_url.id_for_label }}">{{ form.youtube_url.label }}</label>
+            {{ form.youtube_url }}
+            {% if form.youtube_url.errors %}<p class="spo-admin-field__error">{{ form.youtube_url.errors }}</p>{% endif %}
+          </div>
+        </div>
+        {% if form.DELETE %}
+        <label class="spo-admin-delete">
+          {{ form.DELETE }} {% trans "Видалити" %}
+        </label>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="spo-admin-block">
+    <header class="spo-admin-block__head">
+      <h2 class="spo-admin-block__title">{% trans "Фотогалерея" %}</h2>
+      <p class="spo-admin-block__hint">{% trans "URL зображення та посилання при кліку (за потреби)." %}</p>
+    </header>
+    {{ gallery_formset.management_form }}
+    <div class="spo-admin-block__rows" data-spo-formset="gallery">
+      {% for form in gallery_formset %}
+      <div class="spo-admin-row">
+        <div class="spo-admin-row__grid">
+          <div class="spo-admin-field">
+            <label class="spo-admin-field__label" for="{{ form.image_url.id_for_label }}">{{ form.image_url.label }}</label>
+            {{ form.image_url }}
+            {% if form.image_url.errors %}<p class="spo-admin-field__error">{{ form.image_url.errors }}</p>{% endif %}
+          </div>
+          <div class="spo-admin-field">
+            <label class="spo-admin-field__label" for="{{ form.link.id_for_label }}">{{ form.link.label }}</label>
+            {{ form.link }}
+            {% if form.link.errors %}<p class="spo-admin-field__error">{{ form.link.errors }}</p>{% endif %}
+          </div>
+        </div>
+        {% if form.DELETE %}
+        <label class="spo-admin-delete">
+          {{ form.DELETE }} {% trans "Видалити" %}
+        </label>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="spo-admin-block">
+    <header class="spo-admin-block__head">
+      <h2 class="spo-admin-block__title">{% trans "Партнери" %}</h2>
+      <p class="spo-admin-block__hint">{% trans "Логотипи внизу сторінки СПО." %}</p>
+    </header>
+    {{ partner_formset.management_form }}
+    <div class="spo-admin-block__rows" data-spo-formset="partners">
+      {% for form in partner_formset %}
+      <div class="spo-admin-row">
+        <div class="spo-admin-row__grid">
+          <div class="spo-admin-field">
+            <label class="spo-admin-field__label" for="{{ form.image_url.id_for_label }}">{{ form.image_url.label }}</label>
+            {{ form.image_url }}
+            {% if form.image_url.errors %}<p class="spo-admin-field__error">{{ form.image_url.errors }}</p>{% endif %}
+          </div>
+          <div class="spo-admin-field">
+            <label class="spo-admin-field__label" for="{{ form.alt.id_for_label }}">{{ form.alt.label }}</label>
+            {{ form.alt }}
+            {% if form.alt.errors %}<p class="spo-admin-field__error">{{ form.alt.errors }}</p>{% endif %}
+          </div>
+        </div>
+        {% if form.DELETE %}
+        <label class="spo-admin-delete">
+          {{ form.DELETE }} {% trans "Видалити" %}
+        </label>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+
+</div>
+{% endblock %}

@@ -1,25 +1,39 @@
 """Core admin — SiteSettings (singleton), Priority, TeamMember, MemberOrganization, PageSection, MemOrgPage."""
 from __future__ import annotations
 
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.http import HttpResponseRedirect
-from django.urls import reverse
+from django.urls import path, reverse
 from django.utils.html import format_html
+from django.utils.safestring import mark_safe
 from unfold.admin import ModelAdmin
 
-from .models import ContactMessage, JoinRequest, MemOrgPage, MemberOrganization, PageSection, Priority, SiteSettings, TeamMember
+from .models import (
+    ContactMessage,
+    JoinRequest,
+    MemOrgPage,
+    MemberOrganization,
+    PageSection,
+    Priority,
+    SiteSettings,
+    TeamMember,
+)
 
-# #region agent log
-import json as _j, time as _t
-try:
-    with open("/Users/olegbonislavskyi/Sites/Профспілки/.cursor/debug-8dffc0.log", "a") as _f:
-        _f.write(_j.dumps({"sessionId": "8dffc0", "timestamp": int(_t.time() * 1000), "location": "core/admin.py:module_load", "message": "admin module loaded", "data": {"JoinRequest_registered": True}, "hypothesisId": "H2", "runId": "run1"}) + "\n")
-except Exception: pass
-# #endregion
+from . import admin_spo  # noqa: F401 — SpoHomeCacheAdmin
 
 admin.site.site_header = "Адмінпанель ФПУ"
 admin.site.site_title = "ФПУ Admin"
 admin.site.index_title = "Управління сайтом"
+
+
+def unread_messages_badge(*args, **kwargs) -> str:
+    count = ContactMessage.objects.filter(is_read=False).count()
+    return str(count) if count else ""
+
+
+def pending_join_badge(*args, **kwargs) -> str:
+    count = JoinRequest.objects.filter(is_reviewed=False).count()
+    return str(count) if count else ""
 
 
 @admin.register(JoinRequest)
@@ -224,17 +238,17 @@ class MemberOrganizationAdmin(ModelAdmin):
 
 @admin.register(MemOrgPage)
 class MemOrgPageAdmin(ModelAdmin):
-    list_display = ("title", "short_name", "org_type", "region", "founded_year", "has_website", "is_published")
+    list_display = ("title", "short_name", "slug", "org_type", "region", "founded_year", "has_website", "is_published")
     list_editable = ("is_published",)
     list_filter = ("org_type", "is_published")
-    search_fields = ("title", "short_name", "region", "address", "email")
+    search_fields = ("title", "short_name", "slug", "region", "address", "email")
     prepopulated_fields = {"slug": ("title",)}
     readonly_fields = ("source_url",)
     list_per_page = 50
 
     fieldsets = (
         (None, {
-            "fields": ("title", "short_name", "slug", "org_type", "region"),
+            "fields": ("title", "short_name", "slug", "org_type", "region", "is_published"),
         }),
         ("Зміст", {
             "fields": ("description", "meta_description"),
@@ -242,11 +256,12 @@ class MemOrgPageAdmin(ModelAdmin):
         ("Контакти", {
             "fields": ("address", "phone", "email", "founded_year", "website_url"),
         }),
-        ("Логотип та джерело", {
-            "fields": ("logo", "source_url"),
+        ("Логотип", {
+            "fields": ("logo",),
         }),
-        ("Відображення", {
-            "fields": ("is_published",),
+        ("Джерело (тільки читання)", {
+            "fields": ("source_url",),
+            "classes": ("collapse",),
         }),
     )
 
@@ -294,3 +309,4 @@ class PageSectionAdmin(ModelAdmin):
                 url,
             )
         return "—"
+

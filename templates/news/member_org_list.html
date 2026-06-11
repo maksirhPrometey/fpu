@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}{{ category.title }} — {% trans "Федерація Профспілок України" %}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/member_sites.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="content-wrap">
+  <header class="page-header">
+    <h1 class="page-header__title">{{ category.title }}</h1>
+  </header>
+
+  {% if articles %}
+  <ol class="ms-orgs-list" aria-label="{{ category.title }}">
+    {% for art in articles %}
+    <li class="ms-orgs-list__item">
+      <a class="ms-orgs-list__link" href="{{ art.get_absolute_url }}">
+        {% if art.title %}{{ art.title }}{% else %}{{ art.meta_title }}{% endif %}
+      </a>
+    </li>
+    {% endfor %}
+  </ol>
+  {% else %}
+  <p class="empty-notice">{% trans "У цій категорії поки немає матеріалів." %}</p>
+  {% endif %}
+</div>
+{% endblock %}

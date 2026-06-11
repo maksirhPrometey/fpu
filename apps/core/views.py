@@ -11,6 +11,7 @@ from django.views.decorators.http import require_GET, require_http_methods
 
 from apps.core.models import ContactMessage, JoinRequest, MemOrgPage, PageSection, Priority, SiteSettings, TeamMember
 from apps.core.utils import default_articles, default_priorities, default_team_members
+from apps.core.youtube import get_hero_videos
 from apps.news.models import Article
 from apps.pages.models import StaticPage
 
@@ -57,6 +58,7 @@ def home(request: HttpRequest) -> HttpResponse:
         "spo_articles": spo_articles,
         "hero_section": home_sections.get("hero"),
         "announce_section": home_sections.get("announce"),
+        "hero_videos": get_hero_videos(),
     }
     return render(request, "core/home.html", context)
 
@@ -182,53 +184,75 @@ def contact(request: HttpRequest) -> HttpResponse:
 
 @require_GET
 def spo_page(request: HttpRequest) -> HttpResponse:
-    """СПО об'єднань профспілок — section page."""
-    from apps.documents.models import Document, DocumentCategory
+    """СПО об'єднань профспілок — mirror of spo.fpsu.org.ua homepage."""
+    import urllib.error
 
-    spo_articles = list(
-        Article.objects.filter(is_published=True)
-        .filter(
-            Q(category__alias__icontains="spo")
-            | Q(category__path__icontains="spo")
-            | Q(category__title__icontains="СПО")
-        )
+    from django.utils import timezone
+
+    from apps.core.models import SpoHomeCache
+    from apps.core.spo_content import (
+        SPO_HERO_LEAD,
+        SPO_HERO_POINTS,
+        SPO_MEMBERS,
+        SPO_NEWS_ALL_URL,
+    )
+    from apps.core.spo_live_sync import fetch_spo_homepage
+    from apps.news.models import Article
+    from apps.core.youtube import extract_youtube_id, youtube_embed_url, youtube_watch_url
+
+    cache = SpoHomeCache.load()
+    if not cache.videos and not cache.gallery:
+        try:
+            data = fetch_spo_homepage()
+            cache.news = data["news"]
+            cache.videos = data["videos"]
+            cache.gallery = data["gallery"]
+            cache.partners = data["partners"]
+            cache.synced_at = timezone.now()
+            cache.save()
+        except (urllib.error.URLError, TimeoutError, OSError):
+            pass
+
+    wp_articles = list(
+        Article.objects.filter(is_published=True, is_spo=True)
         .select_related("category")
-        .order_by("-published_at")[:10]
+        .order_by("-published_at")[:3]
     )
+    if wp_articles:
+        spo_news = [
+            {
+                "date": article.display_date,
+                "url": article.get_absolute_url(),
+                "title": article.title,
+                "excerpt": article.listing_excerpt,
+                "image_url": article.listing_image_url or article.image_url,
+            }
+            for article in wp_articles
+        ]
+    else:
+        spo_news = cache.news
 
-    spo_doc_categories = list(
-        DocumentCategory.objects.filter(title__icontains="СПО").order_by("order")
-    )
-    spo_docs = list(
-        Document.objects.filter(
-            is_published=True,
-            category__in=spo_doc_categories,
-        ).order_by("-published_at", "-created_at")[:10]
-    ) if spo_doc_categories else []
-
-    # Leadership team — hardcoded per user specification
-    class _Person:
-        def __init__(self, full_name: str, role: str) -> None:
-            self.full_name = full_name
-            self.role = role
-            self.photo_url = ""
-
-        @property
-        def initials(self) -> str:
-            parts = self.full_name.split()
-            return "".join(p[0].upper() for p in parts[:2] if p)
-
-    spo_team = [
-        _Person("Бизов Сергій Сергійович", "Голова ФПУ"),
-        _Person("Москаленко Ігор Іванович", "Заступник Голови ФПУ"),
-        _Person("Драп'ятий Євген Михайлович", "Заступник Голови ФПУ"),
-        _Person("Андреєв Василь Миколайович", "Заступник Голови ФПУ"),
-    ]
+    videos: list[dict] = []
+    for video in cache.videos:
+        video_id = extract_youtube_id(video.get("embed_url", ""))
+        if video_id:
+            videos.append({
+                **video,
+                "embed_url": youtube_embed_url(video_id),
+                "watch_url": video.get("watch_url") or youtube_watch_url(video_id),
+            })
+        else:
+            videos.append(video)
 
     context = {
-        "spo_articles": spo_articles,
-        "spo_docs": spo_docs,
-        "spo_team": spo_team,
+        "spo_hero_lead": SPO_HERO_LEAD,
+        "spo_hero_points": SPO_HERO_POINTS,
+        "spo_members": SPO_MEMBERS,
+        "spo_news": spo_news,
+        "spo_videos": videos,
+        "spo_gallery": cache.gallery,
+        "spo_partners": cache.partners,
+        "spo_news_all_url": SPO_NEWS_ALL_URL,
         "page_meta_title": "СПО об'єднань профспілок",
         "page_meta_description": (
             "Спільний представницький орган репрезентативних всеукраїнських "
@@ -236,10 +260,71 @@ def spo_page(request: HttpRequest) -> HttpResponse:
         ),
         "breadcrumbs": [
             {"title": "Головна", "url": "/"},
-            {"title": "СПО об'єднань профспілок", "url": "/spo-obiednan-profspilok"},
+            {"title": "СПО об'єднань профспілок", "url": "/spo-ob-iednan-profspilok/"},
         ],
     }
     return render(request, "core/spo.html", context)
+
+
+_SPO_NEWS_PAGE_SIZE = 10
+
+
+@require_GET
+def spo_news_list(request: HttpRequest) -> HttpResponse:
+    """All SPO blog posts imported from spo.fpsu.org.ua."""
+    from apps.news.models import Article
+
+    qs = (
+        Article.objects.filter(is_published=True, is_spo=True)
+        .select_related("category")
+        .order_by("-published_at")
+    )
+    paginator = Paginator(qs, _SPO_NEWS_PAGE_SIZE)
+    page_obj = paginator.get_page(request.GET.get("page", 1))
+
+    context = {
+        "articles": list(page_obj.object_list),
+        "page_obj": page_obj,
+        "page_meta_title": "Новини СПО",
+        "page_meta_description": "Новини Спільного представницького органу об'єднань профспілок.",
+        "breadcrumbs": [
+            {"title": "Головна", "url": "/"},
+            {"title": "СПО об'єднань профспілок", "url": "/spo-ob-iednan-profspilok/"},
+            {"title": "Новини", "url": "/spo-ob-iednan-profspilok/novyny/"},
+        ],
+    }
+    return render(request, "core/spo_news_list.html", context)
+
+
+@require_GET
+def spo_news_detail(request: HttpRequest, slug: str) -> HttpResponse:
+    """Single SPO blog post."""
+    from apps.news.models import Article
+
+    article = get_object_or_404(
+        Article,
+        slug=slug,
+        is_spo=True,
+        is_published=True,
+    )
+    canonical = request.build_absolute_uri(article.get_absolute_url())
+    context = {
+        "article": article,
+        "category": article.category,
+        "page_meta_title": article.effective_meta_title,
+        "page_meta_description": article.meta_description or article.summary,
+        "page_meta_keywords": article.meta_keywords,
+        "canonical_url": canonical,
+        "og_image": article.image_url,
+        "og_type": "article",
+        "breadcrumbs": [
+            {"title": "Головна", "url": "/"},
+            {"title": "СПО об'єднань профспілок", "url": "/spo-ob-iednan-profspilok/"},
+            {"title": "Новини", "url": "/spo-ob-iednan-profspilok/novyny/"},
+            {"title": article.title, "url": article.get_absolute_url()},
+        ],
+    }
+    return render(request, "news/article_detail.html", context)
 
 
 _BASE = "https://www.fpsu.org.ua/sajty-chlenskikh-organizatsij-2/2012-12-10-16-02-20"

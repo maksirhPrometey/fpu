@@ -157,7 +157,12 @@
   transition: transform var(--transition-fast), opacity var(--transition-fast);
 }
 
-.has-dropdown:hover .primary-nav__chevron,
+.has-dropdown.is-open > .primary-nav__link {
+  background: rgba(255, 255, 255, 0.10);
+  color: #fff;
+}
+
+.has-dropdown.is-open .primary-nav__chevron,
 .has-dropdown:focus-within .primary-nav__chevron {
   transform: rotate(180deg);
   opacity: 1;
@@ -189,7 +194,7 @@
   transform: translateY(-6px);
 }
 
-.has-dropdown:hover .dropdown,
+.has-dropdown.is-open .dropdown,
 .has-dropdown:focus-within .dropdown {
   opacity: 1;
   visibility: visible;

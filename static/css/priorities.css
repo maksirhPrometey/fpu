@@ -12,7 +12,7 @@
 
   /* Всі чотири кути заокруглені — панель "плаває" у своїй колонці */
   border-radius: var(--r-lg);
-  box-shadow: 0 4px 32px rgba(10, 31, 74, 0.28);
+  box-shadow: 0 4px 24px rgba(10, 31, 74, 0.22);
 
   /* Рівномірний розподіл секцій по висоті */
   justify-content: space-between;
@@ -180,9 +180,8 @@
   transition: color var(--transition-fast);
   display: block;
   padding: var(--sp-4) 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
 }
 
 .pp-links__list a:hover {
@@ -207,20 +206,18 @@
 
 .pp-contacts__list li {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--sp-10, 0.625rem);
   font-size: var(--fs-12);
   color: var(--c-text-on-dark-muted);
-  overflow: hidden;
+  line-height: 1.4;
 }
 
 .pp-contacts__list li a {
   color: var(--c-text-on-dark-muted);
   text-decoration: none;
   transition: color var(--transition-fast);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow-wrap: anywhere;
 }
 
 .pp-contacts__list li a:hover {

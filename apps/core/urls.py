@@ -24,6 +24,12 @@ urlpatterns = [
     path("staty-chlenom-profspilky/", views.join_request_page, name="join"),
     re_path(r"^sajty-chlenskykh-orhanizatsii/?$", views.member_sites_page, name="member_sites"),
     path("chlenski-orhanizatsii/<slug:slug>/", views.mem_org_detail, name="mem_org_detail"),
+    path("spo-ob-iednan-profspilok/novyny/", views.spo_news_list, name="spo_news"),
+    re_path(
+        r"^spo-ob-?iednan-profspilok/novyny/(?P<slug>[\w-]+)/$",
+        views.spo_news_detail,
+        name="spo_news_detail",
+    ),
     re_path(r"^spo-ob-?iednan-profspilok/?$", views.spo_page, name="spo"),
 
     # Редиректи для старих Joomla index.php URL (301 Permanent)

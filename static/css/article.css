@@ -74,10 +74,6 @@
   margin-bottom: var(--sp-4);
 }
 
-.article__body a {
-  color: var(--c-primary-700);
-}
-
 .article__body img {
   max-width: 100%;
   height: auto;

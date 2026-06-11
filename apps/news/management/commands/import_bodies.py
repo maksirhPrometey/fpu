@@ -15,9 +15,7 @@ Options:
     --bodies-json   Path to content_bodies.json  (default: tools/content_bodies.json)
     --menu-tsv      Path to menu.tsv             (default: tools/menu.tsv)
     --rewrite-images
-                    Replace src="/images/ → src="https://www.fpsu.org.ua/images/
-                    and href="/images/ → href="https://www.fpsu.org.ua/images/
-                    in body HTML so inline images render without local files.
+                    Rewrite image src/href in body HTML to local /media/joomla_images/ paths.
     --pages         Also update StaticPage.body for menu items that link to a
                     single article (view=article&id=NNN).
     --batch         Bulk-update batch size (default 500).
@@ -40,14 +38,14 @@ BASE = Path(__file__).resolve().parents[4]
 DEFAULT_BODIES = BASE / "tools" / "data" / "content_bodies.json"
 DEFAULT_MENU = BASE / "tools" / "data" / "menu.tsv"
 
-_IMAGE_SRC_RE = re.compile(r'(src|href)="(/?images/)', re.IGNORECASE)
+from apps.core.media_utils import rewrite_joomla_body_html
+
 _ARTICLE_ID_RE = re.compile(r"view=article&(?:amp;)?id=(\d+)", re.IGNORECASE)
-_FPSU_BASE = "https://www.fpsu.org.ua"
 
 
 def _rewrite_images(html: str) -> str:
-    """Prepend fpsu.org.ua to relative image paths (both /images/ and images/)."""
-    return _IMAGE_SRC_RE.sub(rf'\1="{_FPSU_BASE}/images/', html)
+    """Rewrite image paths and internal links for local site."""
+    return rewrite_joomla_body_html(html)
 
 
 def _read_menu_tsv(path: Path) -> list[list[str]]:
