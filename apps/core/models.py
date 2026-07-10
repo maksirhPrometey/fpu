@@ -177,12 +177,19 @@ class Priority(models.Model):
 
 
 class TeamMember(models.Model):
-    """One person in the «Наша команда» section."""
+    """One person in the «Наша команда» / «Керівництво ФПУ» section."""
 
     full_name = models.CharField(_("Повне імʼя"), max_length=120)
     role = models.CharField(_("Посада"), max_length=160)
     bio = models.CharField(_("Короткий опис"), max_length=300, blank=True)
     photo = models.ImageField(_("Фото"), upload_to="team/", blank=True, null=True)
+    detail_article = models.ForeignKey(
+        "news.Article",
+        verbose_name=_("Стаття з докладною біографією"),
+        null=True, blank=True,
+        on_delete=models.SET_NULL, related_name="+",
+        help_text=_("Якщо вказано — картка стане клікабельною і веде на цю статтю."),
+    )
     order = models.PositiveSmallIntegerField(_("Порядок"), default=0)
     is_active = models.BooleanField(_("Активний"), default=True)
 
@@ -202,6 +209,12 @@ class TeamMember(models.Model):
     def initials(self) -> str:
         parts = self.full_name.split()
         return "".join(p[0].upper() for p in parts[:2] if p)
+
+    @property
+    def detail_url(self) -> str | None:
+        if self.detail_article_id and self.detail_article.is_published:
+            return self.detail_article.get_absolute_url()
+        return None
 
 
 class MemberOrganization(models.Model):

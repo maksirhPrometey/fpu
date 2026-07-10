@@ -131,12 +131,18 @@ class TeamMemberAdmin(ModelAdmin):
     readonly_fields = ("get_photo_preview",)
     list_per_page = 25
 
+    autocomplete_fields = ("detail_article",)
+
     fieldsets = (
         (None, {
             "fields": ("full_name", "role", "bio"),
         }),
         ("Фото", {
             "fields": ("get_photo_preview", "photo"),
+        }),
+        ("Докладніше", {
+            "fields": ("detail_article",),
+            "description": "Якщо вказано — картка стане клікабельною і веде на цю статтю.",
         }),
         ("Відображення", {
             "fields": ("order", "is_active"),
