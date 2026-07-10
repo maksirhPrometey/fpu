@@ -158,7 +158,7 @@
 
 .static-page__body ol li:hover {
   border-left-color: var(--c-primary);
-  background: rgba(13, 143, 163, 0.04);
+  background: rgba(29, 122, 204, 0.04);
 }
 
 .static-page__body ol li::before {
@@ -291,7 +291,7 @@
   color: var(--c-primary-700);
   font-weight: 600;
   line-height: 1.45;
-  box-shadow: 0 2px 8px -2px rgba(6, 122, 139, 0.12);
+  box-shadow: 0 2px 8px -2px rgba(13, 90, 158, 0.12);
   transition:
     border-color var(--transition-fast),
     background var(--transition-fast),
@@ -307,7 +307,7 @@
   color: var(--c-primary);
   border-left-color: var(--c-accent);
   background: var(--c-accent-muted, #f0f4ff);
-  box-shadow: 0 4px 14px -4px rgba(6, 122, 139, 0.18);
+  box-shadow: 0 4px 14px -4px rgba(13, 90, 158, 0.18);
   transform: translateY(-1px);
   text-decoration: none;
 }
