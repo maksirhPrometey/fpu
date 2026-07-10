@@ -134,7 +134,7 @@ def home(request: HttpRequest) -> HttpResponse:
     latest_articles = list(
         Article.objects.filter(is_published=True)
         .select_related("category")
-        .order_by("-published_at")[:6]
+        .order_by("-published_at")[:9]
     )
 
     context = {
