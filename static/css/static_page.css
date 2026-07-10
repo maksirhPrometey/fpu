@@ -196,21 +196,9 @@
   border-left: 4px solid var(--c-accent);
 }
 
-/* ── Керівництво ФПУ: TeamMember-грід всередині page-layout__main ───────── */
+/* ── Керівництво ФПУ: TeamMember-список всередині page-layout__main ─────── */
 .leadership-team {
   margin: 0 0 var(--sp-32);
-}
-
-@media (max-width: 900px) {
-  .leadership-team {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (max-width: 480px) {
-  .leadership-team {
-    grid-template-columns: 1fr;
-  }
 }
 
 .section-nav {

@@ -1,5 +1,6 @@
-/* «Наша команда» — секція під home-grid на всю ширину.
- * Grid: 4 → 3 → 2 колонки. aspect-ratio з padding-trick фолбеком (iOS Safari 14).
+/* «Керівництво ФПУ» — горизонтальні картки (фото зліва, текст справа).
+ * На вузьких екранах (≤560px) картка повертається у вертикальний
+ * вигляд для кращої читабельності (iOS Safari / Android).
  */
 
 .team {
@@ -42,45 +43,47 @@
   margin: 0;
 }
 
-/* ── Grid ────────────────────────────────────────────────────────────── */
+/* ── List (одна колонка горизонтальних карток) ─────────────────────────── */
 
 .team__grid {
   list-style: none;
   margin: 0;
   padding: 0;
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: var(--sp-24);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-16);
 }
 
-/* ── Card ────────────────────────────────────────────────────────────── */
+/* ── Card — горизонтальна: фото | текст ─────────────────────────────────── */
 
 .team-card {
   display: flex;
-  flex-direction: column;
-  gap: var(--sp-14, 0.875rem);
+  align-items: center;
+  gap: var(--sp-24);
   background: var(--c-bg-card, #fff);
   border-radius: var(--r-lg);
   border: 1px solid var(--c-border);
-  padding: var(--sp-24) var(--sp-20);
-  text-align: center;
-  box-shadow: var(--c-shadow-xs, 0 2px 8px -2px rgba(15,44,102,0.1));
+  border-left: 4px solid var(--c-accent);
+  padding: var(--sp-20) var(--sp-28) var(--sp-20) var(--sp-24);
+  text-align: left;
+  box-shadow: var(--c-shadow-xs);
   transition: transform var(--transition-fast), box-shadow var(--transition-fast),
               border-color var(--transition-fast);
 }
 
 .team-card:hover {
-  transform: translateY(-5px);
+  transform: translateX(4px);
   box-shadow: var(--c-shadow);
   border-color: var(--c-border-strong, #c8d0e0);
+  border-left-color: var(--c-accent-600);
 }
 
 /* ── Avatar ──────────────────────────────────────────────────────────── */
 
 .team-card__avatar {
-  margin: 0 auto;
-  width: 96px;
-  height: 96px;
+  margin: 0;
+  width: 92px;
+  height: 92px;
   border-radius: 50%;
   overflow: hidden;
   background: linear-gradient(135deg, var(--c-primary) 0%, var(--c-primary-700) 100%);
@@ -139,20 +142,25 @@
   display: flex;
   flex-direction: column;
   gap: var(--sp-4);
+  flex: 1;
+  min-width: 0;
 }
 
 .team-card__name {
   margin: 0;
-  font-size: var(--fs-16);
-  font-weight: 700;
+  font-size: var(--fs-18);
+  font-weight: 800;
   color: var(--c-primary-700);
   line-height: 1.3;
 }
 
 .team-card__role {
   margin: 0;
-  font-size: var(--fs-14);
-  color: var(--c-text-muted);
+  font-size: var(--fs-13);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--c-accent-600);
+  text-transform: uppercase;
   line-height: 1.4;
 }
 
@@ -161,27 +169,50 @@
   font-size: var(--fs-14);
   color: var(--c-text-muted);
   line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
-/* ── Адаптив ─────────────────────────────────────────────────────────── */
+/* ── Планшет ≤ 900px — трохи менше повітря ──────────────────────────────── */
 
-@media (max-width: 1180px) {
-  .team__grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-
-@media (max-width: 600px) {
-  .team__grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
+@media (max-width: 900px) {
   .team-card {
-    padding: var(--sp-16) var(--sp-12);
+    gap: var(--sp-16);
+    padding: var(--sp-16) var(--sp-20) var(--sp-16) var(--sp-16);
   }
 
   .team-card__avatar {
-    width: 72px;
-    height: 72px;
+    width: 80px;
+    height: 80px;
+  }
+}
+
+/* ── Мобільний ≤ 560px — назад у вертикальний вигляд ───────────────────── */
+
+@media (max-width: 560px) {
+  .team-card {
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    gap: var(--sp-12);
+    border-left: none;
+    border-top: 4px solid var(--c-accent);
+    padding: var(--sp-20) var(--sp-16);
+  }
+
+  .team-card:hover {
+    transform: translateY(-3px);
+    border-top-color: var(--c-accent-600);
+  }
+
+  .team-card__avatar {
+    width: 76px;
+    height: 76px;
+  }
+
+  .team-card__bio {
+    -webkit-line-clamp: 3;
   }
 }
