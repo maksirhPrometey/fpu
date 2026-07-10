@@ -122,16 +122,55 @@ def _napryamki_items() -> list[dict]:
     return items
 
 
+def _holovna_novyna_link() -> str:
+    """Admin link to articles in holovna-novyna category."""
+    try:
+        from apps.news.models import Category
+        cat = Category.objects.get(path="holovna-novyna", is_active=True)
+        return f"/admin/news/article/?category={cat.pk}"
+    except Exception:
+        return "/admin/news/article/?category__path=holovna-novyna"
+
+
+def _home_section_link(section_type: str) -> str:
+    """Direct link to a specific PageSection for home page."""
+    try:
+        from apps.core.models import PageSection
+        obj = PageSection.objects.get(page="home", section_type=section_type)
+        return f"/admin/core/pagesection/{obj.pk}/change/"
+    except Exception:
+        return f"/admin/core/pagesection/add/?page=home&section_type={section_type}"
+
+
 def build_navigation(request: Any) -> list[dict]:
     """Return the Unfold sidebar navigation mirroring the public site."""
     return [
         {
-            "title": "Сайт",
+            "title": "Головна сторінка",
             "separator": False,
             "collapsible": False,
             "items": [
                 {"title": "Перейти на сайт", "icon": "public", "link": "/"},
-                {"title": "Налаштування сайту", "icon": "settings", "link": "/admin/core/sitesettings/"},
+                {
+                    "title": "Hero: статті, відео, анонс",
+                    "icon": "tune",
+                    "link": "/admin/core/sitesettings/1/change/",
+                },
+                {
+                    "title": "Анонси блок (hero)",
+                    "icon": "campaign",
+                    "link": _home_section_link("announce"),
+                },
+                {
+                    "title": "Пріоритети ФПУ",
+                    "icon": "star",
+                    "link": "/admin/core/priority/",
+                },
+                {
+                    "title": "Налаштування сайту",
+                    "icon": "settings",
+                    "link": "/admin/core/sitesettings/1/change/",
+                },
             ],
         },
         {
@@ -159,19 +198,6 @@ def build_navigation(request: Any) -> list[dict]:
             "items": [
                 {"title": "Усі новини", "icon": "newspaper", "link": "/admin/news/article/"},
                 {"title": "Категорії новин", "icon": "label", "link": "/admin/news/category/"},
-            ],
-        },
-        {
-            "title": "СПО об'єднань профспілок",
-            "separator": True,
-            "collapsible": False,
-            "items": [
-                {
-                    "title": "Відео, галерея, партнери",
-                    "icon": "groups",
-                    "link": "/admin/core/spohomecache/",
-                },
-                {"title": "Новини СПО", "icon": "feed", "link": "/admin/news/spoarticle/"},
             ],
         },
         {
@@ -222,10 +248,19 @@ def build_navigation(request: Any) -> list[dict]:
         {
             "title": "Доступ",
             "separator": True,
-            "collapsible": True,
+            "collapsible": False,
             "items": [
-                {"title": "Користувачі", "icon": "person", "link": "/admin/auth/user/"},
-                {"title": "Групи", "icon": "groups", "link": "/admin/auth/group/"},
+                {
+                    "title": "Користувачі адмінки",
+                    "icon": "manage_accounts",
+                    "link": "/admin/auth/user/",
+                },
+                {
+                    "title": "Додати адміна",
+                    "icon": "person_add",
+                    "link": "/admin/auth/user/add/",
+                },
+                {"title": "Групи доступу", "icon": "groups", "link": "/admin/auth/group/"},
             ],
         },
     ]

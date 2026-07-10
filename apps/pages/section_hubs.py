@@ -50,6 +50,9 @@ SECTION_PAGE_DEFS: list[dict] = [
             "представляє її інтереси у відносинах з органами державної влади, "
             "роботодавцями та міжнародними організаціями."
         ),
+        "admin_links": [
+            ("Склад керівництва (персони)", "/admin/core/teammember/"),
+        ],
         "children": [
             ("Виборні органи ФПУ", "/pro-fpu/viborchi-organi-fpu"),
             ("Президія ФПУ", "/pro-fpu/prezidiya"),
@@ -316,7 +319,7 @@ def hub_info_for(url_path: str) -> dict | None:
     clean = _normalize_path(url_path)
     for section in SECTION_PAGE_DEFS:
         if _normalize_path(section["url_path"]) == clean:
-            if section.get("children") or section.get("news_category_path"):
+            if section.get("children") or section.get("news_category_path") or section.get("admin_links"):
                 return section
     return None
 
@@ -433,6 +436,8 @@ def page_content_links(url_path: str, body: str = "") -> list[tuple[str, str]]:
 
     hub = hub_info_for(url_path)
     if hub:
+        for label, admin_url in hub.get("admin_links", []):
+            links.append((label, admin_url))
         for label, href in hub.get("children", []):
             links.append((label, admin_edit_url_for_path(href)))
         news_cat = hub.get("news_category_path")

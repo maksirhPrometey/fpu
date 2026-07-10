@@ -107,6 +107,9 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
+if env.bool("DEBUG_REDIRECT", default=False):
+    MIDDLEWARE.append("apps.core.middleware.debug_redirect.DebugRedirectMiddleware")
+
 ROOT_URLCONF = "project.urls"
 
 TEMPLATES = [

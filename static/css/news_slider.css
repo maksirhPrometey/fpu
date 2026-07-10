@@ -173,7 +173,7 @@
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--c-primary);
-  background: rgba(19, 58, 124, 0.08);
+  background: rgba(13, 143, 163, 0.08);
   border-radius: var(--r-pill);
   padding: var(--sp-4) var(--sp-12);
   width: fit-content;

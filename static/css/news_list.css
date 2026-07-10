@@ -15,12 +15,12 @@
   border: 1px solid var(--c-border);
   border-radius: var(--r-lg);
   padding: var(--sp-20) var(--sp-24);
-  box-shadow: var(--c-shadow-xs, 0 2px 8px -2px rgba(15, 44, 102, 0.10));
+  box-shadow: var(--c-shadow-xs, 0 2px 8px -2px rgba(6, 122, 139, 0.10));
   transition: box-shadow var(--transition-fast), border-color var(--transition-fast);
 }
 
 .blog-item:hover {
-  box-shadow: var(--c-shadow, 0 8px 24px -4px rgba(15, 44, 102, 0.14));
+  box-shadow: var(--c-shadow, 0 8px 24px -4px rgba(6, 122, 139, 0.14));
   border-color: var(--c-border-strong, #c8d0e0);
 }
 
@@ -129,7 +129,7 @@
   border: 1px solid var(--c-border);
   border-radius: var(--r-lg);
   overflow: hidden;
-  box-shadow: var(--c-shadow-xs, 0 2px 8px -2px rgba(15, 44, 102, 0.10));
+  box-shadow: var(--c-shadow-xs, 0 2px 8px -2px rgba(6, 122, 139, 0.10));
   transition: box-shadow var(--transition-fast), transform var(--transition-fast),
               border-color var(--transition-fast);
 }

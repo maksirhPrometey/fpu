@@ -126,7 +126,7 @@
 .form-control:focus {
   outline: none;
   border-color: var(--c-primary);
-  box-shadow: 0 0 0 3px rgba(19, 58, 124, 0.12);
+  box-shadow: 0 0 0 3px rgba(13, 143, 163, 0.12);
 }
 
 .form-control::placeholder {

@@ -54,7 +54,7 @@
       </time>
     </header>
 
-    {% if article.image_url %}
+    {% if article.has_standalone_image %}
     <figure class="article__figure">
       <img class="article__image" src="{{ article.image_url }}" alt="{{ article.title }}" loading="lazy" width="800"
         height="450">

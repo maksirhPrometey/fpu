@@ -7,12 +7,12 @@
 .priorities-panel {
   display: flex;
   flex-direction: column;
-  background: linear-gradient(170deg, var(--c-primary-700) 0%, var(--c-primary-900) 60%, #060f26 100%);
+  background: linear-gradient(170deg, var(--c-primary-700) 0%, var(--c-primary-900) 60%, #032e3a 100%);
   color: var(--c-text-on-dark);
 
   /* Всі чотири кути заокруглені — панель "плаває" у своїй колонці */
   border-radius: var(--r-lg);
-  box-shadow: 0 4px 24px rgba(10, 31, 74, 0.22);
+  box-shadow: 0 4px 24px rgba(5, 77, 95, 0.22);
 
   /* Рівномірний розподіл секцій по висоті */
   justify-content: space-between;

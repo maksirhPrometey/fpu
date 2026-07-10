@@ -61,6 +61,7 @@
         <li class="primary-nav__item{% if item.children %} has-dropdown{% endif %}">
           <a class="primary-nav__link{% if item.is_active %} is-active{% endif %}"
              href="{{ item.url }}"
+             {% if item.external %}target="_blank" rel="noopener noreferrer"{% endif %}
              {% if item.children %}aria-haspopup="true" aria-expanded="false"{% endif %}>
             {{ item.label }}
             {% if item.children %}

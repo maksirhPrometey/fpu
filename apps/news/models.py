@@ -171,6 +171,11 @@ class Article(models.Model):
         return self.get_absolute_url()
 
     @property
+    def has_standalone_image(self) -> bool:
+        """True лише якщо зображення задане явно (не витягнуте з body)."""
+        return bool(self.local_image or file_field_url(self.image))
+
+    @property
     def image_url(self) -> str:
         if self.local_image:
             if self.local_image.startswith("spo/"):

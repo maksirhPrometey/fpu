@@ -18,6 +18,8 @@ from apps.pages.models import StaticPage
 
 @require_GET
 def home(request: HttpRequest) -> HttpResponse:
+    from apps.news.models import Category as _NewsCategory
+
     articles_qs = (
         Article.objects.filter(is_published=True)
         .select_related("category")
@@ -26,6 +28,54 @@ def home(request: HttpRequest) -> HttpResponse:
     articles = list(articles_qs)
     if not articles:
         articles = default_articles()
+
+    # ── Hero: збираємо список [lead, slide1, slide2, slide3, slide4, …решта] ──
+    def _fetch(pk: int | None) -> Article | None:
+        if not pk:
+            return None
+        return (
+            Article.objects.filter(pk=pk, is_published=True)
+            .select_related("category")
+            .first()
+        )
+
+    try:
+        _cfg = SiteSettings.get()
+        pinned_lead   = _fetch(_cfg.hero_lead_article_id)
+        pinned_slides = [
+            a for a in (
+                _fetch(_cfg.hero_slide_1_id),
+                _fetch(_cfg.hero_slide_2_id),
+                _fetch(_cfg.hero_slide_3_id),
+                _fetch(_cfg.hero_slide_4_id),
+            ) if a
+        ]
+    except Exception:
+        pinned_lead, pinned_slides = None, []
+
+    # Якщо жодне поле не заповнене — авто з категорії "Головна новина"
+    if not pinned_lead and not pinned_slides:
+        try:
+            holovna_cat = _NewsCategory.objects.get(path="holovna-novyna", is_active=True)
+            featured = list(
+                Article.objects.filter(category=holovna_cat, is_published=True)
+                .select_related("category")
+                .order_by("-published_at")[:5]
+            )
+            if featured:
+                featured_ids = {a.pk for a in featured}
+                rest = [a for a in articles if a.pk not in featured_ids]
+                articles = (featured + rest)[:13]
+        except Exception:
+            pass
+    else:
+        # Формуємо список: lead + slides + решта (без дублів)
+        pinned_ids = {a.pk for a in [pinned_lead] + pinned_slides if a}
+        rest = [a for a in articles if a.pk not in pinned_ids]
+        lead = pinned_lead or (pinned_slides[0] if pinned_slides else articles[0] if articles else None)
+        slides = pinned_slides if pinned_slides else []
+        articles = ([lead] if lead else []) + slides + rest
+        articles = [a for a in articles if a][:13]
 
     priorities_qs = Priority.objects.filter(is_active=True).order_by("order")
     priorities = list(priorities_qs)
@@ -40,22 +90,18 @@ def home(request: HttpRequest) -> HttpResponse:
         for s in PageSection.objects.filter(page="home", is_active=True).order_by("order")
     }
 
-    spo_articles = list(
+    # "Останні новини" — завжди суто за датою, незалежно від hero-логіки
+    latest_articles = list(
         Article.objects.filter(is_published=True)
-        .filter(
-            Q(category__alias__icontains="spo")
-            | Q(category__path__icontains="spo")
-            | Q(category__title__icontains="СПО")
-        )
         .select_related("category")
-        .order_by("-published_at")[:5]
+        .order_by("-published_at")[:6]
     )
 
     context = {
         "articles": articles,
+        "latest_articles": latest_articles,
         "priorities": priorities,
         "team_members": team_members,
-        "spo_articles": spo_articles,
         "hero_section": home_sections.get("hero"),
         "announce_section": home_sections.get("announce"),
         "hero_videos": get_hero_videos(),

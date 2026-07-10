@@ -1,0 +1,14 @@
+#!/bin/sh
+# ─────────────────────────────────────────────────────────────
+#  Локальний запускач: ./sync
+#  Завантажує скрипт на сервер і показує вивід у реальному часі
+# ─────────────────────────────────────────────────────────────
+SSH="ssh -p 9092 -i $HOME/.ssh/fpsu_key root@testwww.fpsu.org.ua"
+
+# Оновити скрипт на сервері
+scp -P 9092 -i "$HOME/.ssh/fpsu_key" \
+    "$(dirname "$0")/sync_from_live.sh" \
+    root@testwww.fpsu.org.ua:/mnt_data/fpsu/sync_from_live.sh
+
+# Запустити і показати вивід live
+$SSH "chmod +x /mnt_data/fpsu/sync_from_live.sh && /mnt_data/fpsu/sync_from_live.sh"

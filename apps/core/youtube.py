@@ -55,17 +55,35 @@ _DEFAULT_VIDEOS: tuple[HeroVideoItem, ...] = (
 
 
 def get_hero_videos(limit: int = 5) -> list[HeroVideoItem]:
-    """Latest published articles with a YouTube link, else site defaults."""
+    """Latest published articles with a YouTube link, else site defaults.
+
+    If SiteSettings.hero_youtube_url is set, that video is pinned first.
+    """
+    from apps.core.models import SiteSettings
     from apps.news.models import Article
+
+    pinned: list[HeroVideoItem] = []
+    seen: set[str] = set()
+
+    try:
+        settings = SiteSettings.get()
+        if settings.hero_youtube_url:
+            pin_id = extract_youtube_id(settings.hero_youtube_url)
+            if pin_id:
+                pinned = [HeroVideoItem(title="", youtube_id=pin_id)]
+                seen.add(pin_id)
+    except Exception:
+        pass
 
     candidates = (
         Article.objects.filter(is_published=True)
         .filter(Q(body__icontains="youtube.com") | Q(body__icontains="youtu.be"))
-        .order_by("-published_at")[: limit * 3]
+        .order_by("-published_at")[: limit * 4]
     )
-    items: list[HeroVideoItem] = []
-    seen: set[str] = set()
+    items: list[HeroVideoItem] = list(pinned)
     for article in candidates:
+        if len(items) >= limit:
+            break
         video_id = extract_youtube_id(article.body)
         if not video_id or video_id in seen:
             continue
@@ -77,8 +95,6 @@ def get_hero_videos(limit: int = 5) -> list[HeroVideoItem]:
                 article_url=article.get_absolute_url(),
             )
         )
-        if len(items) >= limit:
-            break
 
     if items:
         return items

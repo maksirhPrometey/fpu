@@ -11,13 +11,13 @@
     {% include 'partials/hero_mosaic.html' %}
   </div>
 
-  {% if articles|length > 7 %}
+  {% if latest_articles %}
   <section class="home-news-grid" aria-labelledby="home-news-title">
     <header class="home-news-grid__head">
       <h2 id="home-news-title" class="news-feed__title">{% trans "Останні новини" %}</h2>
     </header>
     <ul class="home-news-grid__list">
-      {% for article in articles|slice:"7:13" %}
+      {% for article in latest_articles %}
       <li class="home-news-grid__item">
         <article class="news-card--compact">
           <a class="news-card--compact__media" href="{{ article.get_absolute_url }}" tabindex="-1" aria-hidden="true">
@@ -54,8 +54,6 @@
     </div>
   </section>
   {% endif %}
-
-  {% include 'partials/spo_panel.html' %}
 
   {% include 'partials/team_panel.html' %}
 

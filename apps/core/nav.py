@@ -58,7 +58,8 @@ NAV_SECTIONS: list[dict] = [
     },
     {
         "label": _("СПО об'єднань профспілок"),
-        "url": "/spo-ob-iednan-profspilok/",
+        "url": "https://spo.fpsu.org.ua/",
+        "external": True,
         "children": [],
     },
     {

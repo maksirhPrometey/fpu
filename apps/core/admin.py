@@ -19,7 +19,8 @@ from .models import (
     TeamMember,
 )
 
-from . import admin_spo  # noqa: F401 — SpoHomeCacheAdmin
+from . import admin_spo    # noqa: F401 — SpoHomeCacheAdmin
+from . import admin_users  # noqa: F401 — custom UserAdmin
 
 admin.site.site_header = "Адмінпанель ФПУ"
 admin.site.site_title = "ФПУ Admin"
@@ -161,7 +162,24 @@ class TeamMemberAdmin(ModelAdmin):
 
 @admin.register(SiteSettings)
 class SiteSettingsAdmin(ModelAdmin):
+    autocomplete_fields = (
+        "hero_lead_article",
+        "hero_slide_1", "hero_slide_2", "hero_slide_3", "hero_slide_4",
+    )
     fieldsets = (
+        ("🏠 Головна сторінка — Hero", {
+            "fields": (
+                "hero_lead_article",
+                "hero_slide_1", "hero_slide_2", "hero_slide_3", "hero_slide_4",
+                "hero_youtube_url",
+            ),
+            "description": (
+                "Головна стаття — великий блок зліва. "
+                "Слайди 1–4 — картки у слайдері справа вгорі. "
+                "Якщо поля порожні — статті беруться автоматично з категорії «Головна новина». "
+                "YouTube — конкретне відео для блоку «Відео» (якщо порожньо — авто з новин)."
+            ),
+        }),
         ("Основне", {
             "fields": ("site_name", "tagline"),
         }),

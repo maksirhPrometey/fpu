@@ -84,8 +84,47 @@ class SiteSettings(models.Model):
         default="/contacts/",
         help_text=_("URL або mailto:, напр. /contacts/ або mailto:fpsu@fpsu.org.ua"),
     )
+    # ── Головна сторінка — Hero ──────────────────────────────────────────────
+    hero_lead_article = models.ForeignKey(
+        "news.Article",
+        verbose_name=_("Hero: головна стаття (великий блок зліва)"),
+        null=True, blank=True,
+        on_delete=models.SET_NULL, related_name="+",
+        help_text=_("Якщо не вказано — береться найновіша з категорії «Головна новина»."),
+    )
+    hero_slide_1 = models.ForeignKey(
+        "news.Article",
+        verbose_name=_("Hero: слайд 1"),
+        null=True, blank=True,
+        on_delete=models.SET_NULL, related_name="+",
+    )
+    hero_slide_2 = models.ForeignKey(
+        "news.Article",
+        verbose_name=_("Hero: слайд 2"),
+        null=True, blank=True,
+        on_delete=models.SET_NULL, related_name="+",
+    )
+    hero_slide_3 = models.ForeignKey(
+        "news.Article",
+        verbose_name=_("Hero: слайд 3"),
+        null=True, blank=True,
+        on_delete=models.SET_NULL, related_name="+",
+    )
+    hero_slide_4 = models.ForeignKey(
+        "news.Article",
+        verbose_name=_("Hero: слайд 4"),
+        null=True, blank=True,
+        on_delete=models.SET_NULL, related_name="+",
+    )
+    hero_youtube_url = models.URLField(
+        _("Hero: відео — YouTube посилання"),
+        blank=True,
+        help_text=_("Напр. https://www.youtube.com/watch?v=XXXXX. "
+                    "Якщо порожньо — береться з останніх новин автоматично."),
+    )
+    # ── Соціальні мережі ─────────────────────────────────────────────────────
     facebook_url = models.URLField(_("Facebook"), blank=True)
-    youtube_url = models.URLField(_("YouTube"), blank=True)
+    youtube_url = models.URLField(_("YouTube-канал (посилання в футері)"), blank=True)
     telegram_url = models.URLField(_("Telegram"), blank=True)
     footer_text = models.TextField(_("Текст футера"), blank=True)
 

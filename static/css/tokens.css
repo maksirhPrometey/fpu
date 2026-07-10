@@ -16,9 +16,9 @@
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-left: env(safe-area-inset-left, 0px);
   --safe-right: env(safe-area-inset-right, 0px);
-  --c-primary: #133a7c;
-  --c-primary-700: #0f2c66;
-  --c-primary-900: #0a1f4a;
+  --c-primary: #0d8fa3;
+  --c-primary-700: #067a8b;
+  --c-primary-900: #054d5f;
   --c-accent: #f4c430;
   --c-accent-600: #e3b41a;
   --c-accent-muted: rgba(244, 196, 48, 0.12);
@@ -34,14 +34,14 @@
   --c-bg-card: #ffffff;
   --c-bg-soft: #f0f3f9;
 
-  --c-panel: #0f2c66;
-  --c-panel-2: #0a1f4a;
+  --c-panel: #067a8b;
+  --c-panel-2: #054d5f;
   --c-border: #e3e7f0;
   --c-border-strong: #c8d0e0;
 
-  --c-shadow-xs: 0 2px 8px -2px rgba(15, 44, 102, 0.10);
-  --c-shadow: 0 8px 24px -8px rgba(15, 44, 102, 0.18);
-  --c-shadow-lg: 0 20px 48px -16px rgba(15, 44, 102, 0.28);
+  --c-shadow-xs: 0 2px 8px -2px rgba(6, 122, 139, 0.10);
+  --c-shadow: 0 8px 24px -8px rgba(6, 122, 139, 0.18);
+  --c-shadow-lg: 0 20px 48px -16px rgba(6, 122, 139, 0.28);
 
   --ff-base: "Open Sans", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 
