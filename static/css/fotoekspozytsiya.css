@@ -293,7 +293,7 @@
   width: 48px;
   height: 3px;
   background: var(--c-accent);
-  border-radius: 2px;
+  border-radius: 0;
   transform: none;
 }
 

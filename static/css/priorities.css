@@ -294,7 +294,7 @@
   width: 40px;
   height: 2px;
   background: linear-gradient(90deg, var(--c-accent), transparent);
-  border-radius: 2px;
+  border-radius: 0;
   margin-top: var(--sp-4);
   opacity: 0.5;
 }

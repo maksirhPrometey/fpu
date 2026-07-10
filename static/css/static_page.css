@@ -141,7 +141,7 @@
   width: 3px;
   height: 14px;
   background: var(--c-accent);
-  border-radius: 2px;
+  border-radius: 0;
   flex-shrink: 0;
 }
 

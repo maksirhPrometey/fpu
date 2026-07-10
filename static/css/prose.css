@@ -30,7 +30,7 @@
   width: 48px;
   height: 2px;
   background: var(--c-accent);
-  border-radius: 2px;
+  border-radius: 0;
 }
 
 .static-page__body > h2:first-child,
@@ -54,7 +54,7 @@
   width: 4px;
   height: 1.1em;
   background: var(--c-accent);
-  border-radius: 2px;
+  border-radius: 0;
   flex-shrink: 0;
 }
 
@@ -400,7 +400,7 @@
   width: 40px;
   height: 2px;
   background: var(--c-accent);
-  border-radius: 2px;
+  border-radius: 0;
 }
 
 /* ── Tables ──────────────────────────────────────────────────────────────── */
