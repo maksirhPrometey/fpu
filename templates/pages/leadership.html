@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}{{ page_meta_title }} — {% trans "Федерація Профспілок України" %}{% endblock %}
+
+{% block page_banner %}
+<div class="page-banner">
+  <div class="page-banner__inner">
+
+    {% if breadcrumbs %}
+    <nav class="page-banner__breadcrumb breadcrumb" aria-label="{% trans 'Навігація' %}">
+      <ol class="breadcrumb__list">
+        {% for crumb in breadcrumbs %}
+          <li class="breadcrumb__item">
+            {% if forloop.last %}
+              <span class="breadcrumb__current" aria-current="page">{{ crumb.title }}</span>
+            {% else %}
+              <a class="breadcrumb__link" href="{{ crumb.url }}">{{ crumb.title }}</a>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ol>
+    </nav>
+    {% endif %}
+
+    <h1 class="page-banner__title">{{ page_title }}</h1>
+  </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="page-layout">
+
+  <div class="page-layout__main">
+    {% if description %}
+      <p class="section-intro">{{ description }}</p>
+    {% endif %}
+
+    {% if team_members %}
+    <ul class="team__grid leadership-team">
+      {% for member in team_members %}
+      <li class="team-card">
+        <div class="team-card__avatar">
+          {% if member.photo_url %}
+          <img src="{{ member.photo_url }}" alt="{{ member.full_name }}" loading="lazy">
+          {% else %}
+          <span class="team-card__initials" aria-hidden="true">{{ member.initials }}</span>
+          {% endif %}
+        </div>
+        <div class="team-card__body">
+          <h3 class="team-card__name">{{ member.full_name }}</h3>
+          <p class="team-card__role">{{ member.role }}</p>
+          {% if member.bio %}
+          <p class="team-card__bio">{{ member.bio }}</p>
+          {% endif %}
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+      <p class="page-empty-notice">{% trans "Склад керівництва оновлюється." %}</p>
+    {% endif %}
+
+    {% if children %}
+    <ul class="section-nav">
+      {% for label, href in children %}
+        <li><a href="{{ href }}">{{ label }}</a></li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </div>
+
+  <aside class="page-layout__sidebar" aria-label="{% trans 'Бокова панель' %}">
+    {% if recent_articles %}
+    <div class="sidebar-widget">
+      <h2 class="sidebar-widget__title">{% trans "Останні новини" %}</h2>
+      <ul class="sidebar-news" role="list">
+        {% for article in recent_articles %}
+          <li class="sidebar-news__item">
+            <a class="sidebar-news__link" href="{{ article.get_absolute_url }}">
+              {{ article.title }}
+            </a>
+            <time class="sidebar-news__date" datetime="{{ article.published_at|date:'Y-m-d' }}">
+              {{ article.display_date }}
+            </time>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+  </aside>
+</div>
+{% endblock %}

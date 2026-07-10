@@ -14,6 +14,44 @@ from apps.core.utils import default_articles, default_priorities, default_team_m
 from apps.core.youtube import get_hero_videos
 from apps.news.models import Article
 from apps.pages.models import StaticPage
+from apps.pages.section_hubs import hub_info_for
+
+_LEADERSHIP_URL_PATH = "/pro-fpu/kerivnitstvo-fpu"
+
+
+@require_GET
+def leadership_page(request: HttpRequest) -> HttpResponse:
+    """«Керівництво ФПУ» — актуальний склад з TeamMember (адмінка).
+
+    Без цього view URL /pro-fpu/kerivnitstvo-fpu/ підхоплював би
+    apps.news.views.category_list і показував 8 застарілих статей,
+    змігрованих з Joomla (2012–2014), замість актуальних 4 осіб.
+    """
+    from apps.pages.views import _build_breadcrumbs
+
+    page = StaticPage.objects.filter(url_path=_LEADERSHIP_URL_PATH, is_published=True).first()
+    hub = hub_info_for(_LEADERSHIP_URL_PATH) or {}
+
+    team_members = list(TeamMember.objects.filter(is_active=True).order_by("order"))
+
+    canonical = request.build_absolute_uri(f"{_LEADERSHIP_URL_PATH}/")
+    recent_articles = (
+        Article.objects.filter(is_published=True)
+        .order_by("-published_at")
+        .only("title", "slug", "published_at", "joomla_id", "category_id")[:5]
+    )
+    context = {
+        "page_title": page.title if page else "Керівництво ФПУ",
+        "description": hub.get("description", ""),
+        "children": hub.get("children", []),
+        "team_members": team_members,
+        "breadcrumbs": _build_breadcrumbs(_LEADERSHIP_URL_PATH),
+        "recent_articles": recent_articles,
+        "page_meta_title": page.effective_meta_title if page else "Керівництво ФПУ",
+        "page_meta_description": page.meta_description if page else "",
+        "canonical_url": canonical,
+    }
+    return render(request, "pages/leadership.html", context)
 
 
 @require_GET

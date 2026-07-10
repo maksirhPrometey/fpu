@@ -12,6 +12,9 @@ urlpatterns = [
     path("", views.home, name="home"),
     path("search/", views.search, name="search"),
     path("contacts/", views.contact, name="contact"),
+    # Перехоплює URL раніше за apps.news category_list (стара категорія
+    # Joomla з 8 застарілими статтями) — показує актуальний TeamMember.
+    re_path(r"^pro-fpu/kerivnitstvo-fpu/?$", views.leadership_page, name="leadership"),
     path("novini/", news_views.all_news, name="all_news"),
     path("staty-chlenom-profspilky/", views.join_request_page, name="join"),
     re_path(r"^sajty-chlenskykh-orhanizatsii/?$", views.member_sites_page, name="member_sites"),
