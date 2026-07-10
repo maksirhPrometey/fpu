@@ -7,6 +7,7 @@ from django.db.models import Q
 from django.http import HttpRequest, HttpResponse, HttpResponsePermanentRedirect
 from django.shortcuts import get_object_or_404, render
 from django.utils.translation import gettext as _
+from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_GET, require_http_methods
 
 from apps.core.models import ContactMessage, JoinRequest, MemOrgPage, PageSection, Priority, SiteSettings, TeamMember
@@ -19,6 +20,7 @@ from apps.pages.section_hubs import hub_info_for
 _LEADERSHIP_URL_PATH = "/pro-fpu/kerivnitstvo-fpu"
 
 
+@never_cache
 @require_GET
 def leadership_page(request: HttpRequest) -> HttpResponse:
     """«Керівництво ФПУ» — актуальний склад з TeamMember (адмінка).
